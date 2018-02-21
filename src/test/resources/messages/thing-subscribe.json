@@ -1,0 +1,30 @@
+{
+  "@graph" : [ {
+    "@graph" : [ {
+      "@id" : "InterIoTMsg:meta/b453273f-36d6-49a2-82ec-d909d8e6f10a",
+      "@type" : [ "InterIoTMsg:meta", "InterIoTMsg:Subscribe" ],
+      "InterIoTMsg:ReceiverPlatformId" : {
+        "@id" : "InterIoT:example-platform1"
+      },
+      "InterIoTMsg:conversationID" : "conv614d3621-7399-45b1-bf2f-505b24045ea6",
+      "InterIoTMsg:dateTimeStamp" : "2018-01-15T21:49:00.655+01:00",
+      "InterIoTMsg:messageID" : "msg7713aa0f-61df-471d-beec-80e8fb71528a",
+      "InterIoTMsg:status" : "myclient"
+    } ],
+    "@id" : "InterIoTMsg:metadata"
+  }, {
+    "@graph" : [ {
+      "@id" : "http://www.example.com/example-sensor",
+      "@type" : "http://purl.oclc.org/NET/ssnx/ssn#Device",
+      "InterIoT:GOIoTP#hasName" : "",
+      "http://www.w3.org/ns/sosa/isHostedBy" : {
+        "@id" : "InterIoT:example-platform1"
+      }
+    } ],
+    "@id" : "InterIoTMsg:payload"
+  } ],
+  "@context" : {
+    "InterIoTMsg" : "http://inter-iot.eu/message/",
+    "InterIoT" : "http://inter-iot.eu/"
+  }
+}

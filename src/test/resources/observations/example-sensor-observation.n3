@@ -1,0 +1,43 @@
+@prefix ns: <http://ontology.universaal.org/PhThing.owl#> .
+@prefix ns1: <http://ontology.universAAL.org/Context.owl#> .
+@prefix ns2: <http://ontology.universaal.org/Measurement.owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ns3: <http://ontology.universaal.org/HealthMeasurement.owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ns4: <http://ontology.universAAL.org/Device.owl#> .
+@prefix : <http://ontology.universAAL.org/SimpleHealthclient.owl#> .
+<urn:org.universAAL.middleware.context.rdf:ContextEvent#_:88d35a51-94de-4206-8e5e-12fa9ff10c2e>
+ns1:hasProvider :401Pub ;
+<http://ontology.universAAL.org/uAAL.owl#theInvolvedHumanUser> ns1:401Doctor;
+a ns1:ContextEvent ;
+rdf:subject <http://inter-iot.eu/dev/401Sensor> ;
+ns1:hasTimestamp "%TIMESTAMP%"^^xsd:long ;
+rdf:predicate ns4:hasValue ;
+rdf:object :1bp .
+:1sys a ns2:Measurement ;
+ns2:value "81.35098"^^xsd:float .
+ns1:gauge a ns1:ContextProviderType .
+ns1:401Doctor a <http://ontology.universAAL.org/Profile.owl#Caregiver>,
+<http://ontology.universAAL.org/Profile.owl#User>,
+ns:PhysicalThing .
+<http://inter-iot.eu/dev/401Sensor> a <http://ontology.universAAL.org/PersonalHealthDevice.owl#BloodPressureSensor> ,
+ns:Device ,
+ns:PhysicalThing ;
+ns4:hasValue :1bp .
+:401Pub a ns1:ContextProvider ;
+ns1:hasType ns1:gauge ;
+ns1:myClassesOfEvents [
+a ns1:ContextEventPattern ;
+<http://www.w3.org/2000/01/rdf-schema#subClassOf> [
+a owl:Restriction ;
+owl:allValuesFrom <http://ontology.universAAL.org/PersonalHealthDevice.owl#BloodPressureSensor> ;
+owl:onProperty rdf:subject
+]
+] .
+:1dias a ns2:Measurement ;
+ns2:value "84.030914"^^xsd:float .
+:1bp ns3:diatolicBloodPreassure :1dias ;
+a ns3:BloodPressure ,
+ns3:HealthMeasurement ;
+ns3:systolicBloodPreassure :1sys .

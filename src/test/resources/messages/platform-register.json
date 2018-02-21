@@ -1,0 +1,34 @@
+{
+  "@graph" : [ {
+    "@graph" : [ {
+      "@id" : "InterIoTMsg:meta/addecd4d-4269-465c-903d-f0eace2bef3c",
+      "@type" : [ "InterIoTMsg:meta", "InterIoTMsg:Platform_register" ],
+      "InterIoTMsg:ReceiverPlatformId" : {
+        "@id" : "InterIoT:example-platform1"
+      },
+      "InterIoTMsg:conversationID" : "conv506c38b5-4ca4-47c3-96b8-1a69f3ca9fba",
+      "InterIoTMsg:dateTimeStamp" : "2018-01-15T21:48:06.735+01:00",
+      "InterIoTMsg:messageID" : "msg06494427-76bb-4ade-8be7-2daaa0d611a1",
+      "InterIoTMsg:status" : "myclient"
+    } ],
+    "@id" : "InterIoTMsg:metadata"
+  }, {
+    "@graph" : [ {
+      "@id" : "_:b0",
+      "@type" : [ "InterIoT:GOIoTP#Middleware", "InterIoT:GOIoTPex#ExamplePlatform" ],
+      "InterIoT:GOIoTP#hasBaseEndpoint" : "http://localhost:4569"
+    }, {
+      "@id" : "InterIoT:example-platform1",
+      "@type" : [ "http://www.w3.org/ns/sosa/Platform", "InterIoT:GOIoTP#SoftwarePlatform" ],
+      "InterIoT:GOIoTP#hasMiddleware" : {
+        "@id" : "_:b0"
+      },
+      "InterIoT:GOIoTP#hasName" : "Example platform"
+    } ],
+    "@id" : "InterIoTMsg:payload"
+  } ],
+  "@context" : {
+    "InterIoTMsg" : "http://inter-iot.eu/message/",
+    "InterIoT" : "http://inter-iot.eu/"
+  }
+}
