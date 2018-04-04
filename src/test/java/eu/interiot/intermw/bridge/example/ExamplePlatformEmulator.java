@@ -15,6 +15,9 @@ package eu.interiot.intermw.bridge.example;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+
+import eu.interiot.intermw.bridge.sofia2.Sofia2Bridge;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -29,7 +32,7 @@ import java.net.URL;
 import java.util.*;
 
 public class ExamplePlatformEmulator {
-    private final Logger logger = LoggerFactory.getLogger(ExampleBridge.class);
+    private final Logger logger = LoggerFactory.getLogger(Sofia2Bridge.class);
     private Map<String, Subscription> subscriptions = new HashMap<>();
     private Map<String, Thread> subscriptionThreads = new HashMap<>();
     private ObjectMapper objectMapper = new ObjectMapper();

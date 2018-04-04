@@ -14,6 +14,8 @@ package eu.interiot.intermw.bridge.example;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+
+import eu.interiot.intermw.bridge.sofia2.Sofia2Bridge;
 import eu.interiot.intermw.commons.DefaultConfiguration;
 import eu.interiot.intermw.commons.interfaces.Configuration;
 import eu.interiot.intermw.commons.model.Platform;
@@ -71,26 +73,26 @@ public class ExampleBridgeTest {
         EntityID platformId = platformRegisterMsg.getMetadata().asPlatformMessageMetadata().getReceivingPlatformIDs().iterator().next();
         Platform platform = new Platform(platformId.toString(), platformRegisterMsg.getPayload());
 
-        ExampleBridge exampleBridge = new ExampleBridge(configuration, platform);
+        Sofia2Bridge sofia2Bridge = new Sofia2Bridge(configuration, platform);
         PublisherMock<Message> publisher = new PublisherMock<>();
-        exampleBridge.setPublisher(publisher);
+        sofia2Bridge.setPublisher(publisher);
 
         // register platform
-        exampleBridge.send(platformRegisterMsg);
+        sofia2Bridge.send(platformRegisterMsg);
         Message responseMsg = publisher.retrieveMessage();
         Set<MessageTypesEnum> messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.PLATFORM_REGISTER));
 
         // register thing
-        exampleBridge.send(thingRegisterMsg);
+        sofia2Bridge.send(thingRegisterMsg);
         responseMsg = publisher.retrieveMessage();
         messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.THING_REGISTER));
 
         // subscribe to thing
-        exampleBridge.send(thingSubscribeMsg);
+        sofia2Bridge.send(thingSubscribeMsg);
         responseMsg = publisher.retrieveMessage();
         messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
