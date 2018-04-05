@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -56,6 +58,7 @@ public class Sofia2Bridge extends AbstractBridge {
     private String sofiaUrl;
     private String TOKEN; // AUTHENTICATION TOKEN. (INCLUDE IT IN THE BRIDGE CONFIGURATION?)
    
+	private Map<String,String> subscriptionIds = new HashMap<String,String>(); 
     
     private Sofia2Client client;
 
@@ -123,6 +126,7 @@ public class Sofia2Bridge extends AbstractBridge {
         try {
 			client.leave();
 			logger.debug("Platform {} has been unregistered.", platformId);
+			subscriptionIds.clear();
 		} catch (Exception e) {
 			logger.error("Unregister Platform  " + e);
 			e.printStackTrace();
@@ -152,7 +156,9 @@ public class Sofia2Bridge extends AbstractBridge {
 		try{
 			Sofia2Translator translator = new Sofia2Translator();
 			URL callbackUrl = new URL(bridgeCallbackUrl, conversationId);
-			client.subscribe(thingId, callbackUrl.toString()); // TODO: RETRIEVE SUBSCRIPTION ID (IT'S NEEDER FOR UNSUBSCRIBE METHOD)
+			String subId = client.subscribe(thingId, callbackUrl.toString());
+			
+			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
 			
 			Spark.put(conversationId, (request, response) -> { // SOFIA 2 sends data using a HTTP PUT query
 	            logger.debug("Received observation from the platform.");
@@ -197,7 +203,6 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message unsubscribe(Message message) throws Exception {
-		// TODO: RETRIEVE AND USE SUBSCRIPTION ID. USE SOFIA2 TRANSLATOR
 		Message responseMessage = createResponseMessage(message);
 		String conversationID = message.getMetadata().getConversationId().orElse(null);
 		
@@ -206,8 +211,10 @@ public class Sofia2Bridge extends AbstractBridge {
 
 			for (String entityId : entityIds) {
 				logger.info("Unsubscribing from thing {}...", entityId);
-				// TODO: RETRIEVE SUBSCRIPTION ID
-				String responseBody = client.unsubscribe(conversationID); // TODO: MUST USE SUBSCRIPTION ID
+				String subId = subscriptionIds.get(entityId); // RETRIEVE SUBSCRIPTION ID
+				String responseBody = client.unsubscribe(subId);
+				
+				subscriptionIds.remove(entityId);
 				
 				// TODO: USE SOFIA2 TRANSLATOR
 //				Sofia2Translator translator = new Sofia2Translator();
@@ -373,98 +380,4 @@ public class Sofia2Bridge extends AbstractBridge {
 	 * 
 	 * */
 	
-	 //   @Override
-	 //   public void send(Message message) throws BridgeException {
-	 //       Set<URIManagerMessageMetadata.MessageTypesEnum> messageTypesEnumSet = message.getMetadata().getMessageTypes();
-	 //       try {
-	 //           if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_REGISTER)) {
-	 //               // When  registering a new platform (an instance of Example platform), a new ExampleBridge instance is created.
-	 //               // After that, the bridge receives corresponding PLATFORM_REGISTER message which was translated by IPSM to do any further processing.
-	 //               Set<String> entityIDs = INTERMWDemoUtils.getEntityIDsFromPayload(
-	 //                       message.getPayload(), INTERMWDemoUtils.EntityTypePlatform);
-	 //               if (entityIDs.size() != 1) {
-	 //                   throw new BridgeException("Missing platform ID.");
-	 //               }
-	//
-//	                registerPlatform(entityIDs.iterator().next());
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_UNREGISTER)) {
-//	                Set<String> entityIDs = INTERMWDemoUtils.getEntityIDsFromPayload(
-//	                        message.getPayload(), INTERMWDemoUtils.EntityTypePlatform);
-//	                if (entityIDs.size() != 1) {
-//	                    throw new BridgeException("Missing platform ID.");
-//	                }
-	//
-//	                unregisterPlatform(entityIDs.iterator().next());
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.THING_REGISTER)) {
-//	                Set<String> entityIds = INTERMWDemoUtils.getEntityIDsFromPayload(message.getPayload(),
-//	                        INTERMWDemoUtils.EntityTypeDevice);
-	//
-//	                for (String entityId : entityIds) {
-//	                    registerThing(entityId);
-//	                }
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.THING_UNREGISTER)) {
-//	                Set<String> entityIds = INTERMWDemoUtils.getEntityIDsFromPayload(message.getPayload(),
-//	                        INTERMWDemoUtils.EntityTypeDevice);
-//	                for (String entityId : entityIds) {
-//	                    unregisterThing(entityId);
-//	                }
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.THING_UPDATE)) {
-//	                if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.OBSERVATION)) {
-//	                    Set<String> entities = INTERMWDemoUtils.getEntityIDsFromPayload(message.getPayload(),
-//	                            INTERMWDemoUtils.EntityTypeDevice);
-//	                    if (entities.isEmpty()) {
-//	                        throw new BridgeException("No entities of type Device found in the Payload.");
-//	                    }
-//	                    String entity = entities.iterator().next();
-//	                    updateThing(entity, message);
-//	                }
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.QUERY)) {
-//	                throw new UnsupportedActionException("QUERY operation is currently not supported.");
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.SUBSCRIBE)) {
-//	                Set<String> entities = INTERMWDemoUtils.getEntityIDsFromPayload(message.getPayload(),
-//	                        INTERMWDemoUtils.EntityTypeDevice);
-//	                if (entities.isEmpty()) {
-//	                    throw new PayloadException("No entities of type Device found in the Payload.");
-//	                } else if (entities.size() > 1) {
-//	                    throw new PayloadException("Only one device is supported by Subscribe operation.");
-//	                }
-	//
-//	                String entity = entities.iterator().next();
-//	                subscribe(entity, message.getMetadata().getConversationId().get());
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.UNSUBSCRIBE)) {
-//	                String conversationID = message.getMetadata().getConversationId().get();
-//	                unsubscribe(new SubscriptionId(conversationID));
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.DISCOVERY)) {
-//	                throw new UnsupportedActionException("The DISCOVERY operation is currently not supported.");
-	//
-//	            } else if (messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.UNRECOGNIZED)) {
-//	                throw new UnknownActionException(String.format(
-//	                        "The action is labelled as UNRECOGNIZED and thus is unprocessable by component %s in platform %s.",
-//	                        this.getClass().getName(), platform.getId().getId()));
-//	            } else {
-//	                throw new UnknownActionException(String.format(
-//	                        "The message type is not properly handled and can't be processed by component %s in platform %s.",
-//	                        this.getClass().getName(), platform.getId().getId()));
-//	            }
-	//
-//	            Message responseMessage = createResponseMessage(message);
-//	            try {
-//	                publisher.publish(responseMessage);
-//	            } catch (BrokerException e) {
-//	                throw new MessageException("Failed to publish response message: " + e.getMessage(), e);
-//	            }
-	//
-//	        } catch (Exception e) {
-//	            logger.error("Failed to process request: " + e.getMessage(), e);
-//	            throw new BridgeException("SOFIA2 bridge failed to process request: " + e.getMessage(), e);
-//	        }
-//	    }
 }
