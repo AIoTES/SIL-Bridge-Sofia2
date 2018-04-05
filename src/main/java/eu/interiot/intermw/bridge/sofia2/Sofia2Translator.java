@@ -26,8 +26,7 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
     private String typeURI;
     private String valueURI;
     private String nameURI;
-    private String timestampURI;
-
+    
     private String attributeURI;
     private String instanceURI;
 
@@ -40,10 +39,17 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
     private String hasNumberURI;
 
     private String valueTypeURI;
-
+    
+    ///////////// CONTEXT DATA
+    private String timestampURI;
+    private String sessionKeyURI;
+    private String userURI;
+    private String kpURI;
+    private String kpInstanceURI;
+    /////////////////////////////////
+    
     private Property hasId;
     private Property hasType;
-    private Property hasTimestamp;
 
     private Property hasValue;
     private Property hasName;
@@ -59,6 +65,15 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
     private Property hasNumber;
     private Resource valueType;
     
+    ///////////// CONTEXT DATA
+    private Property hasTimestamp;
+    private Property hasSessionKey;
+    private Property hasUser;
+    private Property hasKp;
+    private Property hasKpInstance;
+    /////////////////////////////////
+    
+    
     public static String sofia2baseURI = "http://inter-iot.eu/syntax/SOFIA2#";
 
     public Sofia2Translator() {
@@ -68,8 +83,7 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         setTypeURI(getBaseURI() + "hasType");
         setValueURI(getBaseURI() + "hasValue");
         setNameURI(getBaseURI() + "hasName");
-        setTimestampURI(getBaseURI() + "hasTimestamp");
-
+        
         setAttributeURI(getBaseURI() + "hasAttribute");
         setInstanceURI(getBaseURI() + "hasInstance");
 
@@ -82,15 +96,22 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         setHasNumberURI(getBaseURI() + "hasNumber");
 
         setValueTypeURI(getBaseURI() + "Value");
-
+        
+        /////////////////////////////////////
+        setTimestampURI(getBaseURI() + "hasTimestamp");
+        setSessionKeyURI(getBaseURI() + "hasSessionKey");
+        setUserURI(getBaseURI() + "hasUser");
+        setKpURI(getBaseURI() + "hasKp");
+        setKpInstanceURI(getBaseURI() + "hasKpInstance");
+        ////////////////////////////////////
+        
         Model jenaModel = ModelFactory.createDefaultModel();
 
         hasId = jenaModel.createProperty(getIdURI());
         hasType = jenaModel.createProperty(getTypeURI());
         hasValue = jenaModel.createProperty(getValueURI());
         hasName = jenaModel.createProperty(getNameURI());
-        hasTimestamp = jenaModel.createProperty(getTimestampURI());
-
+        
         hasAttribute = jenaModel.createProperty(getAttributeURI());
 
         instanceType = jenaModel.createResource(getInstanceTypeURI());
@@ -102,6 +123,15 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         hasNumber = jenaModel.createProperty(getHasNumberURI());
 
         valueType = jenaModel.createResource(getValueTypeURI());
+        
+        ///////////////////////////////
+        hasTimestamp = jenaModel.createProperty(getTimestampURI());
+        hasSessionKey = jenaModel.createProperty(getSessionKeyURI());
+        hasUser = jenaModel.createProperty(getUserURI());
+        hasKp = jenaModel.createProperty(getKpURI());
+        hasKpInstance = jenaModel.createProperty(getKpInstanceURI());
+        ///////////////////////////////
+        
     }
 
     @Override
@@ -143,7 +173,11 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
                 JsonNode idNode = field.getValue();
                 objectResource.addProperty(hasId, idNode.get("$oid").asText());
             } else if (field.getKey().equals("contextData")) {
-            	JsonNode timeNode = field.getValue().get("timestamp");
+                objectResource.addProperty(hasSessionKey, field.getValue().get("session_key").asText());
+                objectResource.addProperty(hasUser, field.getValue().get("user").asText());
+                objectResource.addProperty(hasKp, field.getValue().get("kp").asText());
+                objectResource.addProperty(hasKpInstance, field.getValue().get("kp_instancia").asText());
+                JsonNode timeNode = field.getValue().get("timestamp");
                 objectResource.addProperty(hasTimestamp, timeNode.get("$date").asText());
             } else {
                 //Add attribute to object
@@ -264,6 +298,10 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
                             props.contains(hasValue) ||
                             props.contains(hasType) ||
                             props.contains(hasTimestamp) ||
+                            props.contains(hasUser) ||
+                            props.contains(hasSessionKey) ||
+                            props.contains(hasKp) ||
+                            props.contains(hasKpInstance) ||
                             props.contains(hasName) ||
                             props.contains(hasId) ||
                             props.contains(hasElement)
@@ -354,10 +392,44 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         	value = nodeIterator.next().toString();
             ObjectNode attributeNode = mapper.createObjectNode();
             attributeNode.put("$oid", value);
- //           entity.set("_id", attributeNode);
+            entity.set("_id", attributeNode);
         }
-
-        //Parse type
+        
+        // PARSE CONTEXT DATA
+        ObjectNode contextData = mapper.createObjectNode();
+        
+        //Parse timestamp
+        nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasTimestamp);
+        if (nodeIterator.hasNext()) {
+        	value = nodeIterator.next().toString();
+        	ObjectNode dateNode = mapper.createObjectNode();
+        	dateNode.put("$date", value);
+        	contextData.set("timestamp", dateNode);
+        }
+        
+        nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasUser);
+        if (nodeIterator.hasNext()) {
+        	value = nodeIterator.next().toString();
+        	contextData.put("user", value);
+        }
+        
+        nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasKp);
+        if (nodeIterator.hasNext()) {
+        	value = nodeIterator.next().toString();
+        	contextData.put("kp", value);
+        }
+        
+        nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasKpInstance);
+        if (nodeIterator.hasNext()) {
+        	value = nodeIterator.next().toString();
+        	contextData.put("kp_instancia", value);
+        }
+        
+        if (contextData.size() > 0){
+        	entity.set("contextData", contextData);
+        }
+        
+      //Parse type
         nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasType); // TRANSLATE AS {"OntologyName":{...}}
         if (nodeIterator.hasNext()) {
         	String ontName = nodeIterator.next().toString();
@@ -368,13 +440,6 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
  //       	entity.set(ontName, dataNode);
         }
         
-        //Parse timestamp
-        nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasTimestamp); // TIMESTAMP IS IN contextData OBJECT
-        if (nodeIterator.hasNext()) {
-        	value = nodeIterator.next().toString();
- //           entity.put("$date", value);
-        }
-
         int i = 1;
         NodeIterator it = jenaModel.listObjectsOfProperty(entityResource, hasAttribute); // TODO: CHECK IF THIS IS CORRECT
         while (it.hasNext()) {
@@ -628,5 +693,38 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
     public String getTimestampURI() {
         return timestampURI;
     }
+    
+    public void setSessionKeyURI(String sessionKeyURI) {
+        this.sessionKeyURI = sessionKeyURI;
+    }
+    
+    public String getSessionKeyURI() {
+        return sessionKeyURI;
+    }
+    
+    public void setUserURI(String userURI) {
+        this.userURI = userURI;
+    }
+    
+    public String getUserURI() {
+        return userURI;
+    }
+    
+    public void setKpURI(String kpURI) {
+        this.kpURI = kpURI;
+    }
+    
+    public String getKpURI() {
+        return kpURI;
+    }
+    
+    public void setKpInstanceURI(String kpInstanceURI) {
+        this.kpInstanceURI = kpInstanceURI;
+    }
+    
+    public String getKpInstanceURI() {
+        return kpInstanceURI;
+    }
+    
     
 }
