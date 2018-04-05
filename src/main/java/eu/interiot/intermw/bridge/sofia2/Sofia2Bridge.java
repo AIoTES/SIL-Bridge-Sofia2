@@ -373,11 +373,4 @@ public class Sofia2Bridge extends AbstractBridge {
 		return responseMessage;
 	}
 	
-	
-	/* 
-	 * 
-	 * SEND METHOD IS NOW IN PARENT CLASS 
-	 * 
-	 * */
-	
 }

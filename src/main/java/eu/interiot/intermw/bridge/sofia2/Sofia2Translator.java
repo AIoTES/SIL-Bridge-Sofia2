@@ -413,6 +413,12 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         	contextData.put("user", value);
         }
         
+        nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasSessionKey);
+        if (nodeIterator.hasNext()) {
+        	value = nodeIterator.next().toString();
+        	contextData.put("session_key", value);
+        }
+        
         nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasKp);
         if (nodeIterator.hasNext()) {
         	value = nodeIterator.next().toString();
