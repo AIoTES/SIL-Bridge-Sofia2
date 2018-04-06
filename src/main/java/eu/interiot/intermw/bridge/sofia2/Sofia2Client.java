@@ -25,39 +25,49 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 //import javax.net.ssl.HttpsURLConnection;
+import java.util.Properties;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import eu.interiot.intermw.bridge.exceptions.BridgeException;
+
 
 public class Sofia2Client {
 	private String url;
-	private String KpInstance =  "Activage";
+	private String KpInstance =  "Activage"; // TODO: add to bridge configuration (?)
 	private String sessionKey;
-	private final String KP = "activage"; // TODO: CREATE KP IN SOFIA2 PLATFORM. INCLUDE KP NAME AS A PROPERTY
-	private final String DEFAULT_ONTOLOGY_NAME = "InventarioDispositivos"; // TODO: DECIDE ONTOLOGY NAME (AND INCLUDE IT AS A PROPERTY)
-	private final String DEFAULT_IDENTIFIER = "numserie"; // TODO: INCLUDE AS A PROPERTY
-	
+	private String KP;
+	private String deviceOntologyName;
+	private String deviceIdentifier;
+	private static final String DEFAULT_URL = "https://sofia2.com/"; // TODO: CHANGE DEFAULT URL
 	private String TOKEN;
 	
-	Sofia2Client(String configUrl, String token){
-		url = configUrl;
-		TOKEN = token;
+	Sofia2Client(Properties properties) throws Exception{
+		String sofiaUser, sofiaPassword;
+		try {
+            sofiaUser = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "user"); // USER + PASSWORD OR TOKEN?
+            sofiaPassword = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "password");
+            TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
+            url = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "address", DEFAULT_URL);
+            KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP", "activage"); // TODO: CREATE KP IN SOFIA2 PLATFORM
+            deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class", "InventarioDispositivos"); // TODO: DECIDE DEFAUL ONTOLOGY NAME
+            deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier", "numserie"); // TODO: DECIDE DEVICE IDENTIFIER PROPERTY
+        } catch (Exception e) {
+            throw new Exception("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
+        }
+		
+		if (Strings.isNullOrEmpty(TOKEN) && (Strings.isNullOrEmpty(sofiaUser) || Strings.isNullOrEmpty(sofiaPassword))) {
+            throw new BridgeException("Invalid SOFIA2 bridge configuration.");
+        }
+		if(Strings.isNullOrEmpty(TOKEN)){
+			String authUrl = url + "console/api/rest/kps/" + KP + "/tokens"; 
+			getToken(authUrl, sofiaUser, sofiaPassword);
+		}
 	}
-	
-	Sofia2Client(String configUrl, String user, String password) throws Exception{
-		url = configUrl;
-		String authUrl = url + "console/api/rest/kps/" + KP + "/tokens"; 
-		getToken(authUrl, user, password);
-	}
-	
-	Sofia2Client(String configUrl, String user, String password, String kp) throws Exception{
-		url = configUrl;
-		String authUrl = url + "console/api/rest/kps/" + kp + "/tokens"; 
-		getToken(authUrl, user, password);
-	}
-	
+		
 	String invoke(String queryUrl, String method, JsonObject ssapResource) throws Exception{
 		URL obj = new URL(queryUrl);
 		byte[] postData = ssapResource.toString().getBytes(StandardCharsets.UTF_8); 
@@ -202,7 +212,7 @@ public class Sofia2Client {
 	
 	String query(String id) throws Exception{
 		// PERHAPS THIS METHOD SHOULD CALL  GET /api_ssap/v01/SSAPResource/{oid} INSTEAD
-		return query(DEFAULT_ONTOLOGY_NAME, DEFAULT_IDENTIFIER, id); // TODO: LOOK FOR A MORE APPROPRIATE QUERY
+		return query(deviceOntologyName, deviceIdentifier, id); // TODO: LOOK FOR A MORE APPROPRIATE QUERY
 	}
 	
 	String list(String ontName) throws Exception{
@@ -225,7 +235,7 @@ public class Sofia2Client {
 	}
 	
 	String list() throws Exception{
-		return list(DEFAULT_ONTOLOGY_NAME);
+		return list(deviceOntologyName);
 	}
 	
 	void register(String thingId) throws Exception{
@@ -252,7 +262,7 @@ public class Sofia2Client {
 	}
 	
 	String subscribe(String id, String callback) throws Exception{
-		return subscribe(DEFAULT_ONTOLOGY_NAME, DEFAULT_IDENTIFIER, id, callback);
+		return subscribe(deviceOntologyName, deviceIdentifier, id, callback);
 	}
 	
 	String subscribe(String ontName, String fieldName, String fieldValue, String callback) throws Exception{
@@ -302,7 +312,7 @@ public class Sofia2Client {
 	
 	void delete(String thingId) throws Exception{
 		// PERHAPS THIS METHOD SHOULD CALL  DELETE /api_ssap/v01/SSAPResource/{oid} INSTEAD
-		delete(DEFAULT_ONTOLOGY_NAME, DEFAULT_IDENTIFIER,thingId);
+		delete(deviceOntologyName, deviceIdentifier,thingId);
 	}
 	
 	void delete(String ontName, String fieldName, String fieldValue) throws Exception{

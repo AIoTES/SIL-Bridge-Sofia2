@@ -18,7 +18,6 @@
  */
 package eu.interiot.intermw.bridge.sofia2;
 
-import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -50,13 +49,9 @@ import java.util.Set;
 @eu.interiot.intermw.bridge.annotations.Bridge(platformType = "sofia2")
 public class Sofia2Bridge extends AbstractBridge {
     private final Logger logger = LoggerFactory.getLogger(Sofia2Bridge.class);
-    private final static String PROPERTIES_PREFIX = "sofia2-";
-    private static final String DEFAULT_URL = "https://sofia2.televes.com/"; // TODO: CHANGE DEFAULT URL. ADD URL TO PROPERTIES
+    final static String PROPERTIES_PREFIX = "sofia2-";
+//    private static final String DEFAULT_URL = "https://sofia2.com/";
     private URL bridgeCallbackUrl;
-    private String sofiaUser;
-    private String sofiaPassword;
-    private String sofiaUrl;
-    private String TOKEN; // AUTHENTICATION TOKEN. (INCLUDE IT IN THE BRIDGE CONFIGURATION?)
    
 	private Map<String,String> subscriptionIds = new HashMap<String,String>(); 
     
@@ -66,26 +61,23 @@ public class Sofia2Bridge extends AbstractBridge {
         super(configuration, platform);
         logger.debug("SOFIA2 bridge is initializing...");
         Properties properties = configuration.getProperties();
-        // TODO: DEFINE BRIDGE CONFIGURATION
+        // TODO: CHECK BRIDGE CONFIGURATION
         try {
-            bridgeCallbackUrl = new URL(configuration.getProperty("bridge.callback.address"));
-            sofiaUser = properties.getProperty("sofia2-user");
-            sofiaPassword = properties.getProperty("sofia2-password");
-            sofiaUrl = properties.getProperty("sofia2-url", DEFAULT_URL); // USER + PASSWORD OR TOKEN?
-
+            bridgeCallbackUrl = new URL(configuration.getProperty(PROPERTIES_PREFIX + "callback-address"));
         } catch (Exception e) {
             throw new BridgeException("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
         }
-
-        if (bridgeCallbackUrl == null ||
-                Strings.isNullOrEmpty(sofiaUser) ||
-                Strings.isNullOrEmpty(sofiaPassword)) {
+        
+        if (bridgeCallbackUrl == null) {
             throw new BridgeException("Invalid SOFIA2 bridge configuration.");
         }
         
-//        client = new Sofia2Client(sofiaUrl, sofiaUser, sofiaPassword);
-        client = new Sofia2Client(sofiaUrl, TOKEN);
-        
+        try{
+        	client = new Sofia2Client(properties);
+        }catch (Exception e) {
+        	throw new BridgeException(e);
+        }
+                
         logger.info("SOFIA2 bridge has been initialized successfully.");
     }
     
@@ -293,7 +285,10 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message platformCreateDevice(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR
 		Message responseMessage = createResponseMessage(message);
+//		Sofia2Translator translator = new Sofia2Translator();
 		try{
+//			String body = translator.toFormatX(message.getPayload().getJenaModel());
+			
 			Set<String> entityIds = Sofia2Utils.getEntityIds(message);
 
 			for (String entityId : entityIds) {
