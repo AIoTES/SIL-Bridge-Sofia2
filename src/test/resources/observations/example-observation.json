@@ -1,0 +1,29 @@
+{
+"body": {
+"data": [
+{
+"_id": {
+"$oid": "511397883006732cf413d47b"
+},
+"SensorTemperatura": {
+"coordenadaGps": {
+"altitud": 0,
+"latitud": 40.508416,
+"longitud": -3.669918
+},
+"identificador": "S_Temperatura_00001",
+"medida": 17,
+"timestamp": 1360238472000,
+"unidad": "C"
+}
+}
+],
+"error": null,
+"ok": true
+},
+"direction": "RESPONSE",
+"messageId": "d1bc4fe5-54c3-4add-abb4-3108201e761f",
+"messageType": "INDICATION",
+"ontology": null,
+"sessionKey": null
+}

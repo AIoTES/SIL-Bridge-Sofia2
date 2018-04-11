@@ -10,7 +10,7 @@
  * This code is licensed under the EPL license, available at the root
  * application directory.
  */
-package eu.interiot.intermw.bridge.example;
+package eu.interiot.intermw.bridge.sofia2;
 
 import eu.interiot.intermw.comm.broker.Broker;
 import eu.interiot.intermw.comm.broker.Publisher;

@@ -1,27 +1,32 @@
 /**
- * INTER-IoT. Interoperability of IoT Platforms.
- * INTER-IoT is a R&D project which has received funding from the European
- * Union’s Horizon 2020 research and innovation programme under grant
- * agreement No 687283.
- * <p>
- * Copyright (C) 2016-2018, by (Author's company of this file):
- * - XLAB d.o.o.
- * <p>
- * This code is licensed under the EPL license, available at the root
- * application directory.
+ * ACTIVAGE. ACTivating InnoVative IoT smart living environments for AGEing well.
+ * ACTIVAGE is a R&D project which has received funding from the European 
+ * Union’s Horizon 2020 research and innovation programme under grant 
+ * agreement No 732679.
+ * 
+ * Copyright (C) 2016-2018, by :
+ * - Universitat Politècnica de València, http://www.upv.es/
+ * 
+ *
+ * For more information, contact:
+ * - @author <a href="mailto:majuse@upv.es">Matilde Julián</a>  
+ * - Project coordinator:  <a href="mailto:coordinator@activage.eu"></a>
+ *  
+ *
+ *    This code is licensed under the EPL license, available at the root
+ *    application directory.
  */
-package eu.interiot.intermw.bridge.example;
+package eu.interiot.intermw.bridge.sofia2;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-
-import eu.interiot.intermw.bridge.sofia2.Sofia2Bridge;
 import eu.interiot.intermw.commons.DefaultConfiguration;
 import eu.interiot.intermw.commons.interfaces.Configuration;
 import eu.interiot.intermw.commons.model.Platform;
-import eu.interiot.message.EntityID;
+import eu.interiot.message.ID.EntityID;
 import eu.interiot.message.Message;
-import eu.interiot.message.URI.URIManagerMessageMetadata.MessageTypesEnum;
+import eu.interiot.message.managers.URI.URIManagerMessageMetadata;
+import eu.interiot.message.managers.URI.URIManagerMessageMetadata.MessageTypesEnum;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,12 +39,12 @@ import java.util.Set;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class ExampleBridgeTest {
-    private ExamplePlatformEmulator platformEmulator;
+public class Sofia2BridgeTest {
+    private Sofia2PlatformEmulator platformEmulator;
 
     @Before
     public void setUp() throws Exception {
-        platformEmulator = new ExamplePlatformEmulator(4569, 5);
+        platformEmulator = new Sofia2PlatformEmulator(4569, 5);
         platformEmulator.start();
     }
 
@@ -73,26 +78,19 @@ public class ExampleBridgeTest {
         EntityID platformId = platformRegisterMsg.getMetadata().asPlatformMessageMetadata().getReceivingPlatformIDs().iterator().next();
         Platform platform = new Platform(platformId.toString(), platformRegisterMsg.getPayload());
 
-        Sofia2Bridge sofia2Bridge = new Sofia2Bridge(configuration, platform);
+        Sofia2Bridge sofiaBridge = new Sofia2Bridge(configuration, platform);
         PublisherMock<Message> publisher = new PublisherMock<>();
-        sofia2Bridge.setPublisher(publisher);
+        sofiaBridge.setPublisher(publisher);
 
         // register platform
-        sofia2Bridge.send(platformRegisterMsg);
+        sofiaBridge.send(platformRegisterMsg);
         Message responseMsg = publisher.retrieveMessage();
         Set<MessageTypesEnum> messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
-        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.PLATFORM_REGISTER));
-
-        // register thing
-        sofia2Bridge.send(thingRegisterMsg);
-        responseMsg = publisher.retrieveMessage();
-        messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
-        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
-        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.THING_REGISTER));
+        assertTrue(messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_REGISTER));
 
         // subscribe to thing
-        sofia2Bridge.send(thingSubscribeMsg);
+        sofiaBridge.send(thingSubscribeMsg);
         responseMsg = publisher.retrieveMessage();
         messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
