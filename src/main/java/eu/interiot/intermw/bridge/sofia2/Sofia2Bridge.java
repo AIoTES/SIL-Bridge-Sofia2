@@ -36,6 +36,7 @@ import eu.interiot.message.exceptions.payload.PayloadException;
 import eu.interiot.message.metadata.PlatformMessageMetadata;
 import eu.interiot.message.utils.INTERMWDemoUtils;
 import eu.interiot.message.utils.MessageUtils;
+import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
 
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;

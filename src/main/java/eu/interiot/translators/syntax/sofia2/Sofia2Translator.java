@@ -1,4 +1,4 @@
-package eu.interiot.intermw.bridge.sofia2;
+package eu.interiot.translators.syntax.sofia2;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import eu.interiot.intermw.commons.model.Platform;
 import eu.interiot.message.Message;
 import eu.interiot.message.MessagePayload;
+import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
 
 
 
