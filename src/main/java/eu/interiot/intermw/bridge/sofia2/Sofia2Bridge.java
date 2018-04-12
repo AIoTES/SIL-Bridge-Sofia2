@@ -65,7 +65,8 @@ public class Sofia2Bridge extends AbstractBridge {
         Properties properties = configuration.getProperties();
         // TODO: CHECK BRIDGE CONFIGURATION
         try {
-            bridgeCallbackUrl = new URL(configuration.getProperty(PROPERTIES_PREFIX + "callback-address"));
+//            bridgeCallbackUrl = new URL(configuration.getProperty(PROPERTIES_PREFIX + "callback-address"));
+            bridgeCallbackUrl = new URL(configuration.getProperty("bridge.callback.address")); // SAME CALLBACK FOR ALL THE BRIDGES IN ONE INSTANCE OF AIoTES
         } catch (Exception e) {
             throw new BridgeException("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
         }

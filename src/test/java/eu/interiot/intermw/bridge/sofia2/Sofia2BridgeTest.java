@@ -58,6 +58,7 @@ public class Sofia2BridgeTest {
         Configuration configuration = new DefaultConfiguration("*.bridge.properties");
 
         URL callbackUrl = new URL(configuration.getProperty("bridge.callback.address"));
+//        URL callbackUrl = new URL(configuration.getProperty("sofia2-callback-address"));
         int callbackPort = callbackUrl.getPort();
         Spark.port(callbackPort);
 
