@@ -34,6 +34,7 @@ import eu.interiot.message.managers.URI.URIManagerMessageMetadata;
 import eu.interiot.message.managers.URI.URIManagerMessageMetadata.MessageTypesEnum;
 import eu.interiot.message.exceptions.payload.PayloadException;
 import eu.interiot.message.metadata.PlatformMessageMetadata;
+import eu.interiot.message.utils.INTERMWDemoUtils;
 import eu.interiot.message.utils.MessageUtils;
 
 import org.apache.jena.rdf.model.Model;
@@ -134,7 +135,8 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message subscribe(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR TO GENERATE SUBSCRIBE QUERY FOR SOFIA2
 		Message responseMessage = MessageUtils.createResponseMessage(message);
-		Set<String> entities = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypeDevice); // Instead of class INTERMWDemoUtils
+		Set<String> entities = INTERMWDemoUtils.getEntityIDsFromPayload(message.getPayload(), INTERMWDemoUtils.EntityTypeDevice);
+//		Set<String> entities = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypeDevice); // Instead of class INTERMWDemoUtils
 		if (entities.isEmpty()) {
             throw new PayloadException("No entities of type Device found in the Payload.");
         } else if (entities.size() > 1) {
@@ -153,7 +155,7 @@ public class Sofia2Bridge extends AbstractBridge {
 			
 			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
 			
-			Spark.put(conversationId, (request, response) -> { // SOFIA 2 sends data using a HTTP PUT query
+			Spark.put(conversationId, (request, response) -> { // SOFIA2 sends data using a HTTP PUT query
 	            logger.debug("Received observation from the platform.");
 	            PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
 	            metadata.initializeMetadata();

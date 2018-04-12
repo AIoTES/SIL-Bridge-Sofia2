@@ -1,15 +1,5 @@
 {
-"body":{
-"data":{
-"_id":ObjectId("53591d96def7260a09e96708")
-},
-"error":null,
-"errorCode":null,
-"ok":true
-},
-"direction":"RESPONSE",
-"messageId":null,
-"messageType":"INSERT",
-"ontology":"%ONTOLOGY%",
-"sessionKey":"ff5b6c48-4cc3-4ce3-a30f-6bf8e18dc340"
+    "join": false,
+    "leave": false,
+    "data": "{\"_id\":ObjectId(\"5a8eaae2e4b06f95860d1e1b\")}"
 }

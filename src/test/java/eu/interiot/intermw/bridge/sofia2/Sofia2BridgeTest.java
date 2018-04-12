@@ -88,6 +88,13 @@ public class Sofia2BridgeTest {
         Set<MessageTypesEnum> messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
         assertTrue(messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_REGISTER));
+        
+        // register thing
+//        sofiaBridge.send(thingRegisterMsg);
+//        Message responseMsg2 = publisher.retrieveMessage();
+//        Set<MessageTypesEnum> messageTypesEnumSet2 = responseMsg2.getMetadata().getMessageTypes();
+//        assertTrue(messageTypesEnumSet2.contains(MessageTypesEnum.RESPONSE));
+//        assertTrue(messageTypesEnumSet2.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_CREATE_DEVICE));
 
         // subscribe to thing
         sofiaBridge.send(thingSubscribeMsg);

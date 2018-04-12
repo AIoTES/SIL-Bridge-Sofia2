@@ -1,29 +1,5 @@
 {
-"body": {
-"data": [
-{
-"_id": {
-"$oid": "511397883006732cf413d47b"
-},
-"SensorTemperatura": {
-"coordenadaGps": {
-"altitud": 0,
-"latitud": 40.508416,
-"longitud": -3.669918
-},
-"identificador": "S_Temperatura_00001",
-"medida": 17,
-"timestamp": 1360238472000,
-"unidad": "C"
-}
-}
-],
-"error": null,
-"ok": true
-},
-"direction": "RESPONSE",
-"messageId": "d1bc4fe5-54c3-4add-abb4-3108201e761f",
-"messageType": "INDICATION",
-"ontology": null,
-"sessionKey": null
+    "join": false,
+    "leave": false,
+    "data": "[ { \"_id\": { \"$oid\": \"510f86598dfe0dd9595f2e15\"} , \"contextData\": { \"session_key\": \"ff5b6c48-4cc3-4ce3-a30f-6bf8e18dc340\" , \"user\": \"sofia\" , \"kp\": \"activage\" , \"kp_instancia\": \"Activage\" , \"timestamp\": { \"$date\" : \"2018-02-06T11:48:21.788Z\"} } , \"SensorTemperatura\": { \"coordenadaGps\": { \"altitud\": 0, \"latitud\": 40.508416, \"longitud\": -3.669918 }, \"identificador\": \"S_Temperatura_00001\", \"medida\": 17, \"timestamp\": 1360238472000, \"unidad\": \"C\" }}]"
 }

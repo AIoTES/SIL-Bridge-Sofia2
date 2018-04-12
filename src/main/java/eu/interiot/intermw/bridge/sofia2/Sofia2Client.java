@@ -171,7 +171,6 @@ public class Sofia2Client {
 		ssapResource.addProperty("token", TOKEN);
 		
 		String responseJoin = invoke(queryURL, "POST", ssapResource);
-		
 		JsonParser parser = new JsonParser();
 		JsonObject ssapResponse = parser.parse(responseJoin).getAsJsonObject();
 		sessionKey = ssapResponse.get("sessionKey").getAsString();

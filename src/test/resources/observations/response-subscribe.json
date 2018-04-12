@@ -1,12 +1,5 @@
 {
-"body":"{
-"data":"d43a929d-4883-4640-8f73-1337c518bd17",
-"error":null,
-"ok":true
-}",
-"direction":"RESPONSE",
-"messageId":"c260fbd6-ce7e-4f1d-983d-0152b419223c",
-"messageType":"SUBSCRIBE",
-"ontology":"SensorTemperatura",
-"sessionKey":"ff5b6c48-4cc3-4ce3-a30f-6bf8e18dc340"
+    "join": false,
+    "leave": false,
+    "data": "d43a929d-4883-4640-8f73-1337c518bd17"
 }

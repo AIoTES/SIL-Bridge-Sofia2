@@ -72,18 +72,15 @@ public class Sofia2PlatformEmulator {
             	 platformResponse = Resources.toString(url1, Charsets.UTF_8);
             }else if(input.leave==true){
             	logger.debug("LEAVE request.");
-           	 	URL url1 = Resources.getResource("observations/response-leave.json");
-           	 	platformResponse = Resources.toString(url1, Charsets.UTF_8);
             }else{
             	logger.debug("INSERT request.");
             	URL url1 = Resources.getResource("observations/response-insert.json");
            	 	String platformResponseTemplate = Resources.toString(url1, Charsets.UTF_8);
            	 	platformResponse = platformResponseTemplate.replace("%ONTOLOGY%", input.ontology); 	
             }
-            
-            response.body(platformResponse);
+            response.header("Content-Type", "application/json;charset=UTF-8");
             response.status(200);
-            return "";
+            return platformResponse;
         });
         
         
@@ -92,6 +89,7 @@ public class Sofia2PlatformEmulator {
             String query;
             String ontology;
             String sessionKey;
+            String platformResponse = "";
             
             try {
                 sessionKey = request.queryParams("$sessionKey");
@@ -106,12 +104,12 @@ public class Sofia2PlatformEmulator {
             	response.status(400);
             }else{ 	
            	 	URL url1 = Resources.getResource("observations/response-query.json");
-           	 	String  platformResponse = Resources.toString(url1, Charsets.UTF_8);
-           	 	response.body(platformResponse);
+           	 	platformResponse = Resources.toString(url1, Charsets.UTF_8);
+           	 	response.header("Content-Type", "application/json;charset=UTF-8");
            	 	response.status(200);
             }
             
-            return "";
+            return platformResponse;
         });
         
         spark.get("sib/services/api_ssap/v01/SSAPResource/subscribe", (request, response) -> {
@@ -128,7 +126,7 @@ public class Sofia2PlatformEmulator {
                 return e.getMessage();
             }
             
-            if (subscriptions.containsKey(subscriptionQuery)) { // subscriptions.containsKey(input.conversationId)
+            if (subscriptions.containsKey(subscriptionQuery)) {
                 response.status(409);
                 return "Already subscribed.";
             }
@@ -145,9 +143,9 @@ public class Sofia2PlatformEmulator {
             
             URL url1 = Resources.getResource("observations/response-subscribe.json");
        	 	String  platformResponse = Resources.toString(url1, Charsets.UTF_8);
-       	 	response.body(platformResponse);
+       	 	response.header("Content-Type", "application/json;charset=UTF-8");
             response.status(200);
-            return "";
+            return platformResponse;
         });
 
         logger.info("ExamplePlatformEmulator is listening on port {}.", port);
@@ -186,7 +184,7 @@ public class Sofia2PlatformEmulator {
 
             while (!Thread.interrupted()) {
                 try {
-                	  HttpPut httpPut = new HttpPut(subscription.getCallbackUrl());
+                	HttpPut httpPut = new HttpPut(subscription.getCallbackUrl());
                     HttpEntity httpEntity = new StringEntity(observation, ContentType.getByMimeType("application/json"));
                     httpPut.setEntity(httpEntity);
                     httpClient.execute(httpPut);
