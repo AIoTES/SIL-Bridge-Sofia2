@@ -299,7 +299,7 @@ public class Sofia2Bridge extends AbstractBridge {
 			for (String entityId : entityIds) {
 				String thingId = Sofia2Utils.filterThingID(entityId);
 				logger.debug("Registering thing {}...", thingId);
-				client.register(thingId);
+				client.register(thingId); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
 	    		logger.debug("Success");
 			}
     	}catch(Exception e){

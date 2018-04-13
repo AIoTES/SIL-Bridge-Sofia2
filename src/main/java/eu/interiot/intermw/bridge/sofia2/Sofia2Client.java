@@ -37,7 +37,7 @@ import eu.interiot.intermw.bridge.exceptions.BridgeException;
 
 public class Sofia2Client {
 	private String url;
-	private String KpInstance =  "Activage"; // TODO: add to bridge configuration (?)
+	private String KpInstance =  "sofia2Bridge"; // TODO: add to bridge configuration (?)
 	private String sessionKey;
 	private String KP;
 	private String deviceOntologyName;
@@ -53,16 +53,19 @@ public class Sofia2Client {
             TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
             url = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "address", DEFAULT_URL);
             KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP", "activage"); // TODO: CREATE KP IN SOFIA2 PLATFORM
-            deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class", "InventarioDispositivos"); // TODO: DECIDE DEFAUL ONTOLOGY NAME
-            deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier", "numserie"); // TODO: DECIDE DEVICE IDENTIFIER PROPERTY
+            deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
+            deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier");
         } catch (Exception e) {
             throw new Exception("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
         }
 		
+		if(Strings.isNullOrEmpty(deviceOntologyName) || Strings.isNullOrEmpty(deviceIdentifier)) {
+			throw new BridgeException("Invalid SOFIA2 bridge configuration.");
+		}
+		
 		if (Strings.isNullOrEmpty(TOKEN) && (Strings.isNullOrEmpty(sofiaUser) || Strings.isNullOrEmpty(sofiaPassword))) {
             throw new BridgeException("Invalid SOFIA2 bridge configuration.");
-        }
-		if(Strings.isNullOrEmpty(TOKEN)){
+        }else if(Strings.isNullOrEmpty(TOKEN)){
 			String authUrl = url + "console/api/rest/kps/" + KP + "/tokens"; 
 			getToken(authUrl, sofiaUser, sofiaPassword);
 		}
