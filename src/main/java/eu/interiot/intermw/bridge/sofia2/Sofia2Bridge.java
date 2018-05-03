@@ -155,7 +155,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			URL callbackUrl = new URL(bridgeCallbackUrl, conversationId);
 			String subId = client.subscribe(thingId, callbackUrl.toString());
 			
-			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
+//			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
+			subscriptionIds.put(conversationId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD. UNSUBSCRIBE MESSAGE CONTAINS CONVERSATIONID
 			
 			Spark.put(conversationId, (request, response) -> { // SOFIA2 sends data using a HTTP PUT query
 	            logger.debug("Received observation from the platform.");
@@ -201,24 +202,29 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message unsubscribe(Message message) throws Exception {
 		Message responseMessage = MessageUtils.createResponseMessage(message);
-		String conversationID = message.getMetadata().getConversationId().orElse(null);
+		String conversationId = message.getMetadata().getConversationId().orElse(null);
 		
 		try{
-			Set<String> entityIds = Sofia2Utils.getEntityIds(message);
+//			Set<String> entityIds = Sofia2Utils.getEntityIds(message); // CHECK MESSAGE DATA
 
-			for (String entityId : entityIds) {
-				logger.info("Unsubscribing from thing {}...", entityId);
-				String subId = subscriptionIds.get(entityId); // RETRIEVE SUBSCRIPTION ID
-				String responseBody = client.unsubscribe(subId);
-				
-				subscriptionIds.remove(entityId);
-				
+//			for (String entityId : entityIds) {
+//				logger.info("Unsubscribing from thing {}...", entityId);
+//				String subId = subscriptionIds.get(entityId); // RETRIEVE SUBSCRIPTION ID
+//				String responseBody = client.unsubscribe(subId);				
+//				subscriptionIds.remove(entityId);
+//			}
+			
+			logger.info("Unsubscribing from things in conversation {}...", conversationId);
+			String subId = subscriptionIds.get(conversationId); // RETRIEVE SUBSCRIPTION ID
+			String responseBody = client.unsubscribe(subId);				
+			subscriptionIds.remove(conversationId);
+			
 				// TODO: USE SOFIA2 TRANSLATOR
 //				Sofia2Translator translator = new Sofia2Translator();
 //				Model translatedModel = translator.toJenaModel(responseBody);			
 //				MessagePayload responsePayload = new MessagePayload(translatedModel);
 //				responseMessage.setPayload(responsePayload);
-			}
+			
 		} catch (Exception e){ 
 			logger.error("Error unsubscribing: " + e.getMessage());
 			e.printStackTrace();
