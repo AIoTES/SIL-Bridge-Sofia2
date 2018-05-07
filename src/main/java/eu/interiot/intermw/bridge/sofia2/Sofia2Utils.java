@@ -50,15 +50,29 @@ public class Sofia2Utils {
 
 		// TODO: CHECK IF THIS IS APPROPRIATE FOR SOFIA2
 
-		if (thingId.contains("http://inter-iot.eu/dev/")) {
-			filteredString = thingId.replace("http://inter-iot.eu/dev/", "");
-		} 
-		if (thingId.contains("/")) {
-			filteredString = thingId.replace("/", "-");
+//		if (thingId.contains("http://inter-iot.eu/dev/")) {
+//			filteredString = thingId.replace("http://inter-iot.eu/dev/", "");
+//		} 
+//		if (thingId.contains("/")) {
+//			filteredString = thingId.replace("/", "-");
+//		}
+//		if (thingId.contains("#")) {
+//			filteredString = thingId.replace("#", "+");
+//		}
+    	
+    	if (thingId.contains("http://")) {
+    		String[] splitId = thingId.split("/");
+    		filteredString = splitId[splitId.length - 1];
+    		filteredString = filteredString.replace("#", "");
+		}else{
+			if (thingId.contains("/")) {
+				filteredString = thingId.replace("/", "-");
+			}
+			if (thingId.contains("#")) {
+				filteredString = thingId.replace("#", "+");
+			}
 		}
-		if (thingId.contains("#")) {
-			filteredString = thingId.replace("#", "+");
-		}
+    	
 		return filteredString;
 	}
     

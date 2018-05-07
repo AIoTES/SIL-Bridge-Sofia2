@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 //import javax.net.ssl.HttpsURLConnection;
 import java.util.Properties;
@@ -272,20 +273,26 @@ public class Sofia2Client {
 		String subscriptionId = "";
 		String queryUrl = url + "sib/services/api_ssap/v01/SSAPResource/subscribe";
 		
-		String query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // TODO: check if this query is correct 
+//		String query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // NATIVE 
+		
+		String query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = " + fieldValue; // SQLLIKE 
 		
 		String params = "?$sessionKey=" + sessionKey;
-		params = params + "&$query=" + query;
-		params = params + "&$queryType=NATIVE";
 		params = params + "&$msRefresh=200"; // At least 0.2 second between notifications
 		params = params + "&$endpoint=" + callback;
+		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); // TODO: CHECK IF THIS WORKS ON THE SERVER
+//		params = params + "&$query=" + query; // THIS SHOULD WORK ON THE SERVER
+//		params = params + "&$queryType=NATIVE";
+		params = params + "&$queryType=SQLLIKE";
+		
+		System.out.println(queryUrl + params);
 		
 		String responseBody = invokeGet(queryUrl + params);
 		
 		// GET SUBSCRIPTION ID FROM RESPONSE BODY
 		JsonParser parser = new JsonParser();
 		JsonObject responseObject = parser.parse(responseBody).getAsJsonObject();
-		subscriptionId = responseObject.get("data").getAsString(); // TODO: CHECK SERVER RESPONSE
+		subscriptionId = responseObject.get("data").getAsString();
 		
 		return subscriptionId;
 	}
