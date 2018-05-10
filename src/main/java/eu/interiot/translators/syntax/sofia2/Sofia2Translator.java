@@ -185,7 +185,7 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
             	JsonNode node = field.getValue();
             	if(node.isObject()){
             		// The returned JSON object for an ontology instance has _id and ContextData fields
-            			if(objectNode.has("_id") && objectNode.has("ContextData")){	
+            			if(objectNode.has("_id") && objectNode.has("contextData")){	
             		 		objectResource.addProperty(hasType, field.getKey()); // The key is the class name            		 		
             		 		Iterator<Map.Entry<String, JsonNode>> itNode = node.fields();
             		 		while(itNode.hasNext()){
