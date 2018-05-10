@@ -67,9 +67,9 @@ public class Sofia2BridgeTest {
         String platformRegisterJson = Resources.toString(url1, Charsets.UTF_8);
         Message platformRegisterMsg = new Message(platformRegisterJson);
 
-        URL url2 = Resources.getResource("messages/thing-register.json");
-        String thingRegisterJson = Resources.toString(url2, Charsets.UTF_8);
-        Message thingRegisterMsg = new Message(thingRegisterJson);
+ //       URL url2 = Resources.getResource("messages/thing-register.json");
+ //       String thingRegisterJson = Resources.toString(url2, Charsets.UTF_8);
+ //       Message thingRegisterMsg = new Message(thingRegisterJson);
 
         URL url3 = Resources.getResource("messages/thing-subscribe.json");
         String thingSubscribeJson = Resources.toString(url3, Charsets.UTF_8);

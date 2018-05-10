@@ -1,0 +1,62 @@
+[
+	{ 
+	"_id": 
+		{ 
+		"$oid": "510f86598dfe0dd9595f2e15"
+		} ,
+	"contextData": 
+		{
+		"session_key": "ff5b6c48-4cc3-4ce3-a30f-6bf8e18dc340" ,
+		"user": "sofia" , 
+		"kp": "activage" , 
+		"kp_instancia": "Activage" ,	
+		"timestamp": 
+			{ 
+			"$date" : "2018-02-06T11:48:21.788Z"
+			}
+		} , 
+	"SensorTemperatura" : 
+		{	
+		"coordenadaGps" : 
+			{ 
+			"altitud" : 0.0 , 
+			"latitud" : 40.51083 , 
+			"longitud" : -3.669006
+			} , 
+		"identificador" : "S_Temperatura_00001", 
+		"medida" : 23 , 
+		"timestamp" : 1359971931226 , 
+		"unidad" : "C"
+		} 
+	},
+	{ 
+	"_id": 
+		{ 
+		"$oid": "510f86598dfe0dd9595ffe15"
+		} ,
+		"contextData": 
+			{
+			"session_key": "ff5b6c48-4cc3-4ce3-a30f-6bf8e18dc340" ,
+			"user": "sofia" , 
+			"kp": "activage" , 
+			"kp_instancia": "Activage" ,	
+			"timestamp": 
+				{ 
+				"$date" : "2018-02-06T11:48:21.788Z"
+				}
+			} , 
+		"SensorTemperatura" : 
+			{	
+			"coordenadaGps" : 
+				{ 
+				"altitud" : 0.0 , 
+				"latitud" : 40.51283 , 
+				"longitud" : -3.669106
+				} , 
+			"identificador" : "S_Temperatura_00002", 
+			"medida" : 25 , 
+			"timestamp" : 1359971931334 , 
+			"unidad" : "C"
+			} 
+	}
+]

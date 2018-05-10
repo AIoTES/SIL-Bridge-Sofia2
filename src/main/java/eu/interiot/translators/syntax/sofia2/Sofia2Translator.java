@@ -182,14 +182,21 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
             } else {
                 //Add attribute to object
             	// JSON OBJECT OR ONTOLOGY INSTANCE. IF IT'S AN ONTOLOGY INSTANCE, TRANSLATE AS "hasType" + OTHER ATTRIBUTES
-            	// CHECK IF THIS IS TRUE
             	JsonNode node = field.getValue();
             	if(node.isObject()){
-            		 Iterator<Map.Entry<String, JsonNode>> itNode = objectNode.fields();
-            		 Map.Entry<String, JsonNode> instance = itNode.next();
-            		 	if(!itNode.hasNext() && !instance.getKey().equals("$date")){
-            		 		objectResource.addProperty(hasType, instance.getKey()); // The key is the class name
-            		 		parseJSONObjectToJena(objectResource, instance.getValue(), jenaModel); // The value is a JSON object containing the attributes
+            		// The returned JSON object for an ontology instance has _id and ContextData fields
+            			if(objectNode.has("_id") && objectNode.has("ContextData")){	
+            		 		objectResource.addProperty(hasType, field.getKey()); // The key is the class name            		 		
+            		 		Iterator<Map.Entry<String, JsonNode>> itNode = node.fields();
+            		 		while(itNode.hasNext()){
+            		 			Map.Entry<String, JsonNode> instanceAttr = itNode.next();
+            		 			Resource attr = jenaModel.createResource();
+                                attr.addProperty(RDF.type, attributeType);
+                                objectResource.addProperty(hasAttribute, attr);
+                                attr.addProperty(hasName, instanceAttr.getKey());
+                                parseValueToJena(attr, instanceAttr.getValue(), jenaModel);
+            		 		}
+            		 		
             		 	}else{
             		 		Resource attr = jenaModel.createResource();
                             attr.addProperty(RDF.type, attributeType);
@@ -386,6 +393,9 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         //TODO
     	String value;
     	
+    	ObjectNode dataNode = null;
+    	String ontName = "";
+    	   	
         //Parse id
         NodeIterator nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasId); // TRANSLATE AS {"_id":{"$oid":"..."}}
         if (nodeIterator.hasNext()) {
@@ -438,10 +448,9 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
       //Parse type
         nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasType); // TRANSLATE AS {"OntologyName":{...}}
         if (nodeIterator.hasNext()) {
-        	String ontName = nodeIterator.next().toString();
-        	ObjectNode dataNode = mapper.createObjectNode();
-        	entity.set(ontName, dataNode);
-        	parseAttributesToJson(nodeIterator.next().asResource(), dataNode, jenaModel, mapper);
+        	ontName = nodeIterator.next().toString();
+        	dataNode = mapper.createObjectNode();
+        	
  //       	JsonNode dataNode = parseRDFEntityToJson(nodeIterator.next().asResource(), jenaModel, mapper);
  //       	entity.set(ontName, dataNode);
         }
@@ -470,18 +479,43 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
 //                        JsonNode jsonNode = parseRDFEntityToJson(valueNode.asResource(), jenaModel, mapper);
                         ObjectNode attributeNode = mapper.createObjectNode();
 //                        entity.set(attributeName, attributeNode);
-                        entity.set(attributeName, parseRDFEntityToJson(valueNode.asResource(), jenaModel, mapper));
+                        
+                        if(dataNode != null){
+                        	dataNode.set(attributeName, parseRDFEntityToJson(valueNode.asResource(), jenaModel, mapper));
+                        }else{
+                        	entity.set(attributeName, parseRDFEntityToJson(valueNode.asResource(), jenaModel, mapper));
+                        }
+                        
+                        
 //                        parseAttributesToJson(valueNode.asResource(), attributeNode, jenaModel, mapper);
                     } else if (valueNode.isLiteral()) {
                         ValueNode jsonValueNode = parseLiteralToValueNode(valueNode.asLiteral(), mapper);
-                        entity.set(attributeName, jsonValueNode);
+                        
+                        if(dataNode != null){
+                        	dataNode.set(attributeName, jsonValueNode);
+                        }else{
+                        	entity.set(attributeName, jsonValueNode);
+                        }
+                        
+                        
                     }
                 } else {
                     ObjectNode attributeNode = mapper.createObjectNode();
-                    entity.set(attributeName, attributeNode);
+                    
+                    if(dataNode != null){
+                    	dataNode.set(attributeName, attributeNode);
+                    }else{
+                    	entity.set(attributeName, attributeNode);
+                    }
+                    
                     parseAttributesToJson(attribute.asResource(), attributeNode, jenaModel, mapper);
+                    
                 }
             }
+        } // End while
+        
+        if(dataNode != null){ // Ontology instace
+        	entity.set(ontName, dataNode);
         }
 
     }

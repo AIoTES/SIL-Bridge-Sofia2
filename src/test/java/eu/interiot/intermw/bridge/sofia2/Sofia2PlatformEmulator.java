@@ -59,6 +59,10 @@ public class Sofia2PlatformEmulator {
             SsapInput input;
             try {
                 input = objectMapper.readValue(request.body(), SsapInput.class);
+                System.out.println("HTTP POST received");
+                System.out.println("***** BODY ****");
+                System.out.println(request.body());
+                System.out.println("*********");
             } catch (Exception e) {
                 response.status(400);
                 return e.getMessage();
@@ -95,6 +99,11 @@ public class Sofia2PlatformEmulator {
                 sessionKey = request.queryParams("$sessionKey");
             	query = request.queryParams("$query");
             	ontology = request.queryParams("$ontology");
+            	System.out.println("Query parameters");
+                System.out.println("Ontology: " + ontology);
+                System.out.println("Query: " + query);
+                System.out.println("SessionKey: " + sessionKey);
+                System.out.println("*********");
             } catch (Exception e) {
                 response.status(400);
                 return e.getMessage();
@@ -121,6 +130,11 @@ public class Sofia2PlatformEmulator {
             	sessionKey = request.queryParams("$sessionKey");
             	subscriptionQuery = request.queryParams("$query");
             	callbackUrl = request.queryParams("$endpoint");
+            	System.out.println("Subscription parameters");
+                System.out.println("Callback URL: " + callbackUrl);
+                System.out.println("Query: " + subscriptionQuery);
+                System.out.println("SessionKey: " + sessionKey);
+                System.out.println("*********");
             } catch (Exception e) {
                 response.status(400);
                 return e.getMessage();
