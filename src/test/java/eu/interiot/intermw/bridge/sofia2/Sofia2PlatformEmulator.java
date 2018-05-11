@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
@@ -201,10 +202,13 @@ public class Sofia2PlatformEmulator {
                 	HttpPut httpPut = new HttpPut(subscription.getCallbackUrl());
                     HttpEntity httpEntity = new StringEntity(observation, ContentType.getByMimeType("application/json"));
                     httpPut.setEntity(httpEntity);
-                    httpClient.execute(httpPut);
+                    HttpResponse response = httpClient.execute(httpPut);
                     logger.debug("Observation for thing {} has been sent to {}.", subscription.getSubscriptionQuery(),
                             subscription.getCallbackUrl());
-
+                    if(response.getStatusLine().getStatusCode() == 200){
+                    	System.out.println("Observation has been sent to the bridge:");
+                    	System.out.println(observation);
+                    }
                 } catch (Exception e) {
                     logger.error("Failed to send observation to {}.", subscription.getCallbackUrl());
                 }

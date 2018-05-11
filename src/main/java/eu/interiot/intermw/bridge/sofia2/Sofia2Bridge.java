@@ -34,8 +34,6 @@ import eu.interiot.message.managers.URI.URIManagerMessageMetadata;
 import eu.interiot.message.managers.URI.URIManagerMessageMetadata.MessageTypesEnum;
 import eu.interiot.message.exceptions.payload.PayloadException;
 import eu.interiot.message.metadata.PlatformMessageMetadata;
-import eu.interiot.message.utils.INTERMWDemoUtils;
-import eu.interiot.message.utils.MessageUtils;
 import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
 
 import org.apache.jena.rdf.model.Model;
@@ -89,8 +87,8 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message registerPlatform(Message message) throws Exception {
 		// SSAP JOIN
-		Message responseMessage = MessageUtils.createResponseMessage(message);
-		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform);  // Instead of class INTERMWDemoUtils
+		Message responseMessage = createResponseMessage(message);
+		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform);
         if (entityIDs.size() != 1) {
             throw new BridgeException("Missing platform ID.");
         }
@@ -112,8 +110,8 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message unregisterPlatform(Message message) throws Exception {
 		// SSAP LEAVE
-		Message responseMessage = MessageUtils.createResponseMessage(message);
-		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform); // Instead of class INTERMWDemoUtils
+		Message responseMessage = createResponseMessage(message);
+		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform);
         if (entityIDs.size() != 1) {
             throw new BridgeException("Missing platform ID.");
         }
@@ -136,9 +134,8 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message subscribe(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR TO GENERATE SUBSCRIBE QUERY FOR SOFIA2
-		Message responseMessage = MessageUtils.createResponseMessage(message);
-		Set<String> entities = INTERMWDemoUtils.getEntityIDsFromPayload(message.getPayload(), INTERMWDemoUtils.EntityTypeDevice);
-//		Set<String> entities = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypeDevice); // Instead of class INTERMWDemoUtils
+		Message responseMessage = createResponseMessage(message);
+		Set<String> entities = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypeDevice);
 		if (entities.isEmpty()) {
             throw new PayloadException("No entities of type Device found in the Payload.");
         } else if (entities.size() > 1) {
@@ -201,7 +198,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message unsubscribe(Message message) throws Exception {
-		Message responseMessage = MessageUtils.createResponseMessage(message);
+		Message responseMessage = createResponseMessage(message);
 		String conversationId = message.getMetadata().getConversationId().orElse(null);
 		
 		try{
@@ -239,7 +236,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message query(Message message) throws Exception {
 		// TODO: CHECK DEVICE ID
-		Message responseMessage = MessageUtils.createResponseMessage(message);
+		Message responseMessage = createResponseMessage(message);
 		try{
 			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
 			for(String deviceId : deviceIds){
@@ -269,7 +266,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message listDevices(Message message) throws Exception {
-		Message responseMessage = MessageUtils.createResponseMessage(message);
+		Message responseMessage = createResponseMessage(message);
 		try{
 			// Discover all the registered devices
 			String responseBody = client.list();
@@ -295,7 +292,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message platformCreateDevice(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR
-		Message responseMessage = MessageUtils.createResponseMessage(message);
+		Message responseMessage = createResponseMessage(message);
 //		Sofia2Translator translator = new Sofia2Translator();
 		try{
 //			String body = translator.toFormatX(message.getPayload().getJenaModel());
@@ -328,7 +325,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message platformDeleteDevice(Message message) throws Exception {
 		// TODO: CHECK DEVICE ID
-		Message responseMessage = MessageUtils.createResponseMessage(message);
+		Message responseMessage = createResponseMessage(message);
 		try {
 			logger.debug("Removing devices...");
 			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
@@ -365,7 +362,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message error(Message message) throws Exception {
 		logger.debug("Error occured in {}...", message);
-		Message responseMessage = MessageUtils.createResponseMessage(message);
+		Message responseMessage = createResponseMessage(message);
 		responseMessage.getMetadata().setStatus("KO");
 		responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
 		return responseMessage;
@@ -374,7 +371,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message unrecognized(Message message) throws Exception {
 		logger.debug("Unrecognized message type.");
-		Message responseMessage = MessageUtils.createResponseMessage(message);
+		Message responseMessage = createResponseMessage(message);
 		responseMessage.getMetadata().setStatus("OK");
 		return responseMessage;
 	}
