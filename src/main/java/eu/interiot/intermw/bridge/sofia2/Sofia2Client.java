@@ -43,16 +43,16 @@ public class Sofia2Client {
 	private String KP;
 	private String deviceOntologyName;
 	private String deviceIdentifier;
-	private static final String DEFAULT_URL = "https://sofia2.com/"; // TODO: CHANGE DEFAULT URL
+//	private static final String DEFAULT_URL = "https://sofia2.com/"; // TODO: CHANGE DEFAULT URL
 	private String TOKEN;
+	private String sofiaUser, sofiaPassword;
 	
 	Sofia2Client(Properties properties) throws Exception{
-		String sofiaUser, sofiaPassword;
 		try {
             sofiaUser = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "user"); // USER + PASSWORD OR TOKEN?
             sofiaPassword = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "password");
             TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
-            url = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "address", DEFAULT_URL);
+ //           url = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "address", DEFAULT_URL);
             KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP", "activage"); // TODO: CREATE KP IN SOFIA2 PLATFORM
             deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
             deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier");
@@ -66,12 +66,17 @@ public class Sofia2Client {
 		
 		if (Strings.isNullOrEmpty(TOKEN) && (Strings.isNullOrEmpty(sofiaUser) || Strings.isNullOrEmpty(sofiaPassword))) {
             throw new BridgeException("Invalid SOFIA2 bridge configuration.");
-        }else if(Strings.isNullOrEmpty(TOKEN)){
+        }
+	}
+		
+	void setUrl(String baseUrl) throws Exception{
+		url = baseUrl;
+		if(Strings.isNullOrEmpty(TOKEN)){
 			String authUrl = url + "console/api/rest/kps/" + KP + "/tokens"; 
 			getToken(authUrl, sofiaUser, sofiaPassword);
 		}
 	}
-		
+	
 	String invoke(String queryUrl, String method, JsonObject ssapResource) throws Exception{
 		URL obj = new URL(queryUrl);
 		byte[] postData = ssapResource.toString().getBytes(StandardCharsets.UTF_8); 

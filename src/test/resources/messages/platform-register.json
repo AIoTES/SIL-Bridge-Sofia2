@@ -15,8 +15,8 @@
   }, {
     "@graph" : [ {
       "@id" : "_:b0",
-      "@type" : [ "InterIoT:GOIoTP#Middleware", "InterIoT:GOIoTPex#ExamplePlatform" ],
-      "InterIoT:GOIoTP#hasBaseEndpoint" : "http://localhost:4569"
+      "@type" : [ "InterIoT:GOIoTP#Middleware", "InterIoT:GOIoTPex#sofia2" ],
+      "InterIoT:GOIoTP#hasBaseEndpoint" : "http://localhost:4569/"
     }, {
       "@id" : "InterIoT:example-platform1",
       "@type" : [ "http://www.w3.org/ns/sosa/Platform", "InterIoT:GOIoTP#SoftwarePlatform" ],

@@ -95,6 +95,8 @@ public class Sofia2Bridge extends AbstractBridge {
         String platformId = entityIDs.iterator().next();
         logger.debug("Registering platform {}...", platformId);
         try {
+        	String baseUrl = platform.getBaseURL();
+        	client.setUrl(baseUrl);
 			client.join();
 			logger.debug("Platform {} has been registered.", platformId);
 		} catch (Exception e) {
