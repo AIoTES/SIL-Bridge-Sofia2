@@ -51,7 +51,6 @@ import java.util.Set;
 public class Sofia2Bridge extends AbstractBridge {
     private final Logger logger = LoggerFactory.getLogger(Sofia2Bridge.class);
     final static String PROPERTIES_PREFIX = "sofia2-";
-//    private static final String DEFAULT_URL = "https://sofia2.com/";
     private URL bridgeCallbackUrl;
    
 	private Map<String,String> subscriptionIds = new HashMap<String,String>(); 
@@ -62,7 +61,6 @@ public class Sofia2Bridge extends AbstractBridge {
         super(configuration, platform);
         logger.debug("SOFIA2 bridge is initializing...");
         Properties properties = configuration.getProperties();
-        // TODO: CHECK BRIDGE CONFIGURATION
         try {
 //            bridgeCallbackUrl = new URL(configuration.getProperty(PROPERTIES_PREFIX + "callback-address"));
             bridgeCallbackUrl = new URL(configuration.getProperty("bridge.callback.address")); // SAME CALLBACK FOR ALL THE BRIDGES IN ONE INSTANCE OF AIoTES
@@ -75,7 +73,7 @@ public class Sofia2Bridge extends AbstractBridge {
         }
         
         try{
-        	client = new Sofia2Client(properties);
+        	client = new Sofia2Client(properties, platform.getBaseURL());
         }catch (Exception e) {
         	throw new BridgeException(e);
         }
@@ -95,8 +93,6 @@ public class Sofia2Bridge extends AbstractBridge {
         String platformId = entityIDs.iterator().next();
         logger.debug("Registering platform {}...", platformId);
         try {
-        	String baseUrl = platform.getBaseURL();
-        	client.setUrl(baseUrl);
 			client.join();
 			logger.debug("Platform {} has been registered.", platformId);
 		} catch (Exception e) {
@@ -167,12 +163,11 @@ public class Sofia2Bridge extends AbstractBridge {
 	            metadata.setConversationId(conversationId);
 	
 //	            String observation = request.body();
-	            // TODO: CHECK PLATFORM MESSAGE FORMAT
 	            JsonParser parser = new JsonParser();
 	    		JsonObject ssapObject = parser.parse(request.body().toString()).getAsJsonObject();
 	    		String observation = ssapObject.get("data").getAsString();
 	            
-	            Model translatedModel = translator.toJenaModel(observation); //TODO: CHECK THIS
+	            Model translatedModel = translator.toJenaModel(observation);
 	    		// Create a new message payload for the response message
 	    		MessagePayload responsePayload = new MessagePayload(translatedModel);
 	            	            
@@ -237,7 +232,6 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message query(Message message) throws Exception {
-		// TODO: CHECK DEVICE ID
 		Message responseMessage = createResponseMessage(message);
 		try{
 			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
