@@ -22,11 +22,19 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-//import javax.net.ssl.HttpsURLConnection;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
@@ -47,6 +55,7 @@ public class Sofia2Client {
 	private final String STRING_TYPE = "string"; 
 	private String TOKEN;
 	private String sofiaUser, sofiaPassword;
+	private int msRefresh = 100000;
 	
 	Sofia2Client(Properties properties, String baseUrl) throws Exception{
 		try {
@@ -59,6 +68,61 @@ public class Sofia2Client {
             deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
             deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier");
             identifierType = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier-type", STRING_TYPE);
+            
+         // THIS IS A HACK TO AVOID PROBLEMS WITH SSL CERTIFICATE HOSTNAME VERIFICATION
+    		javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+    			    new javax.net.ssl.HostnameVerifier(){
+    			 
+    			        public boolean verify(String hostname,
+    			                javax.net.ssl.SSLSession sslSession) {
+    			            if (hostname.contains("sofia2.televes")) {
+    			                return true;
+    			            }
+    			            else if (hostname.equals("sofia2.com")){
+    			            	return true;
+    			            }
+    			            else return false;
+    			        }
+    			    });
+    		// THIS IS A HACK TO AVOID PROBLEMS WITH SSL SELF-SIGNED CERTIFICATES
+    		 TrustManager[] trustAllCerts = new TrustManager[]{
+                     new X509ExtendedTrustManager()
+                     {
+                         @Override
+                         public java.security.cert.X509Certificate[] getAcceptedIssuers(){
+                             return null;
+                         }
+
+                         @Override
+                         public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType){}
+
+                         @Override
+                         public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType){}
+                       
+
+                         @Override
+                         public void checkClientTrusted(java.security.cert.X509Certificate[] xcs, String string, SSLEngine ssle) throws CertificateException{}
+
+                         @Override
+                         public void checkServerTrusted(java.security.cert.X509Certificate[] xcs, String string, SSLEngine ssle) throws CertificateException{}
+
+						@Override
+						public void checkClientTrusted(X509Certificate[] arg0, String arg1, Socket arg2)
+								throws CertificateException {
+						}
+
+						@Override
+						public void checkServerTrusted(X509Certificate[] arg0, String arg1, Socket arg2)
+								throws CertificateException {
+						}
+
+                     }
+             };
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    		
+            
         } catch (Exception e) {
             throw new Exception("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
         }
@@ -111,12 +175,18 @@ public class Sofia2Client {
 	String invokeGet(String queryUrl) throws Exception{
 		URL obj = new URL(queryUrl);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-		con.setDoInput(true);
-		con.setUseCaches(false);
-		con.setRequestMethod("GET");
-		con.setRequestProperty("Accept", "application/json; charset=UTF-8"); 
-		con.connect();
-		int responseCode = con.getResponseCode(); 
+		int responseCode = 0;
+		try{
+			con.setDoInput(true);
+			con.setUseCaches(false);
+			con.setRequestMethod("GET");
+			con.setRequestProperty("Accept", "application/json; charset=UTF-8"); 
+			con.connect();
+			responseCode = con.getResponseCode();
+		}catch(Exception ex){
+			throw ex;
+		}
+		 
 		
 		if (responseCode < 200 || responseCode > 299) {
             throw new Exception("Unsuccessful server response: " + responseCode);
@@ -174,7 +244,7 @@ public class Sofia2Client {
 		String queryURL = url + "sib/services/api_ssap/v01/SSAPResource/";
 		JsonObject ssapResource = new JsonObject();
 		ssapResource.addProperty("join", true);
-		ssapResource.addProperty("instanceKP", KpInstance);
+		ssapResource.addProperty("instanceKP", KP +":"+ KpInstance);
 		ssapResource.addProperty("token", TOKEN);
 		
 		String responseJoin = invoke(queryURL, "POST", ssapResource);
@@ -278,17 +348,22 @@ public class Sofia2Client {
 		
 //		query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // NATIVE 
 		
+		// NATIVE 
+//		if(identifierType.equals(STRING_TYPE)) query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}";
+//		else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}";
+		
 		// SQLLIKE
 		if(identifierType.equals(STRING_TYPE)) query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = \"" + fieldValue + "\""; // string identifier
 		else query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = " + fieldValue;  // numeric identifier
 		
 		String params = "?$sessionKey=" + sessionKey;
-		params = params + "&$msRefresh=200"; // At least 0.2 second between notifications
-		params = params + "&$endpoint=" + callback;
+		params = params + "&$msRefresh=" + msRefresh;
+		params = params + "&$ontology=" + ontName;
 		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); // TODO: CHECK IF THIS WORKS ON THE SERVER
 //		params = params + "&$query=" + query; // THIS SHOULD WORK ON THE SERVER
-//		params = params + "&$queryType=NATIVE";
-		params = params + "&$queryType=SQLLIKE";
+//		params = params + "&$queryType=NATIVE"; // NATIVE
+		params = params + "&$queryType=SQLLIKE"; //SQLLIKE
+		params = params + "&$endpoint=" + callback;
 		
 		System.out.println(queryUrl + params);
 		

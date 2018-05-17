@@ -147,13 +147,17 @@ public class Sofia2Bridge extends AbstractBridge {
 	    
 		try{
 			Sofia2Translator translator = new Sofia2Translator();
-			URL callbackUrl = new URL(bridgeCallbackUrl, conversationId);
+//			String endpoint = conversationId; // UNIQUE ENDPOINT
+			String endpoint = "endpoint";
+			
+			URL callbackUrl = new URL(bridgeCallbackUrl, endpoint);
 			String subId = client.subscribe(thingId, callbackUrl.toString());
 			
 //			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
+			
 			subscriptionIds.put(conversationId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD. UNSUBSCRIBE MESSAGE CONTAINS CONVERSATIONID
 			
-			Spark.put(conversationId, (request, response) -> { // SOFIA2 sends data using a HTTP PUT query
+			Spark.put(endpoint, (request, response) -> { // SOFIA2 sends data using a HTTP PUT query
 	            logger.debug("Received observation from the platform.");
 	            PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
 	            metadata.initializeMetadata();
@@ -177,7 +181,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	            publisher.publish(observationMessage);
 	            logger.debug("Observation message has been published upstream.");
-	
+	            System.out.println(observationMessage.serializeToJSONLD());
 	            response.status(200);
 	            return "";
 	        });
