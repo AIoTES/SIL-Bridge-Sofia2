@@ -140,10 +140,11 @@ public class Sofia2Bridge extends AbstractBridge {
             throw new PayloadException("Only one device is supported by Subscribe operation.");
         }
 		
-//		String thingId = entities.iterator().next();
-		String thingId = Sofia2Utils.filterThingID(entities.iterator().next());
+//		String thingId = Sofia2Utils.filterThingID(entities.iterator().next());
+		String devId = entities.iterator().next();
+		String[] thingId = Sofia2Utils.filterThingID(devId);
 	    String conversationId = message.getMetadata().getConversationId().orElse(null);
-	    logger.debug("Subscribing to thing {} using conversationId {}...", thingId, conversationId);
+	    logger.debug("Subscribing to thing {} using conversationId {}...", devId, conversationId);
 	    
 		try{
 			Sofia2Translator translator = new Sofia2Translator();
@@ -151,10 +152,15 @@ public class Sofia2Bridge extends AbstractBridge {
 			String endpoint = "endpoint";
 			
 			URL callbackUrl = new URL(bridgeCallbackUrl, endpoint);
-			String subId = client.subscribe(thingId, callbackUrl.toString());
+			String subId = "";
+			if(thingId.length > 1){
+				subId = client.subscribe(thingId[0], thingId[1], thingId[2], callbackUrl.toString()); // Subscription to a thing in SOFIA2
+			}
+//			else{
+//				subId = client.subscribe(thingId[thingId.length - 1], callbackUrl.toString()); // Subscription to an ontology?
+//			}
 			
 //			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
-			
 			subscriptionIds.put(conversationId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD. UNSUBSCRIBE MESSAGE CONTAINS CONVERSATIONID
 			
 			Spark.put(endpoint, (request, response) -> { // SOFIA2 sends data using a HTTP PUT query
@@ -165,8 +171,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.RESPONSE);
 	            metadata.setSenderPlatformId(new EntityID(platform.getId().getId()));
 	            metadata.setConversationId(conversationId);
-	
-//	            String observation = request.body();
+	            
 	            JsonParser parser = new JsonParser();
 	    		JsonObject ssapObject = parser.parse(request.body().toString()).getAsJsonObject();
 	    		String observation = ssapObject.get("data").getAsString();
@@ -240,8 +245,9 @@ public class Sofia2Bridge extends AbstractBridge {
 		try{
 			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
 			for(String deviceId : deviceIds){
-				String thingId = Sofia2Utils.filterThingID(deviceId);
-				String responseBody = client.query(thingId);
+				String thingId[] = Sofia2Utils.filterThingID(deviceId);
+//				String responseBody = client.query(thingId);
+				String responseBody = client.query(thingId[0], thingId[1], thingId[2]);
 				Sofia2Translator translator = new Sofia2Translator();
 				// Create the model from the response JSON
 				Model translatedModel = translator.toJenaModel(responseBody);
@@ -300,10 +306,11 @@ public class Sofia2Bridge extends AbstractBridge {
 			Set<String> entityIds = Sofia2Utils.getEntityIds(message);
 
 			for (String entityId : entityIds) {
-				String thingId = Sofia2Utils.filterThingID(entityId);
-				logger.debug("Registering thing {}...", thingId);
-				client.register(thingId); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
-	    		logger.debug("Success");
+				String thingId[] = Sofia2Utils.filterThingID(entityId);
+				logger.debug("Registering thing {}...", entityId);
+//				client.register(thingId); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
+//	    		logger.debug("Success");
+				logger.debug("Unsupported method: Platform create device");
 			}
     	}catch(Exception e){
     		logger.error("Error creating devices: " + e.getMessage());
@@ -330,9 +337,10 @@ public class Sofia2Bridge extends AbstractBridge {
 			logger.debug("Removing devices...");
 			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
 			for(String deviceId : deviceIds){
-				String transformedId = Sofia2Utils.filterThingID(deviceId);
-				client.delete(transformedId);
-				logger.debug("Device {} has been removed.", transformedId);
+				String[] transformedId = Sofia2Utils.filterThingID(deviceId);
+//				client.delete(transformedId);
+				client.delete(transformedId[0], transformedId[1], transformedId[2]);
+				logger.debug("Device {} has been removed.", deviceId);
 			}
 			responseMessage.getMetadata().setStatus("OK");
 		} 

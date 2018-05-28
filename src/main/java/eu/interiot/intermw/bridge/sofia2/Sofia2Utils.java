@@ -87,31 +87,36 @@ public class Sofia2Utils {
 		return getEntityIDsFromPayload(message.getPayload(), EntityTypeDevice);
 	}
     
-    public static String filterThingID(String thingId) {
-    	String filteredString = thingId;
+    public static String[] filterThingID(String thingId) {
+    	String[] filteredString = null; //= thingId;
 
 		// TODO: CHECK IF THIS IS APPROPRIATE FOR SOFIA2
-
-//		if (thingId.contains("http://inter-iot.eu/dev/")) {
-//			filteredString = thingId.replace("http://inter-iot.eu/dev/", "");
-//		} 
-//		if (thingId.contains("/")) {
-//			filteredString = thingId.replace("/", "-");
-//		}
-//		if (thingId.contains("#")) {
-//			filteredString = thingId.replace("#", "+");
-//		}
-    	
     	if (thingId.contains("http://")) {
-    		String[] splitId = thingId.split("/");
-    		filteredString = splitId[splitId.length - 1];
-    		filteredString = filteredString.replace("#", "");
+    		if(thingId.contains("#")){
+    			// ThingId http://inter-iot.eu/dev/{ontName}/{idName}#{id}
+    			thingId = thingId.replace("#", "/");
+        		String[] splitId = thingId.split("/");
+        		filteredString = new String[3];
+        		filteredString[0] = splitId[splitId.length - 3];  // Ontology name
+        		filteredString[1] = splitId[splitId.length - 2]; // Id name
+        		filteredString[2] = splitId[splitId.length - 1]; // id value
+//        		filteredString = splitId[splitId.length - 1];
+//        		filteredString = filteredString.replace("#", "");
+    		}else{
+    			// http://inter-iot.eu/dev/{ontName}
+    			String[] splitId = thingId.split("/");
+        		filteredString = new String[1];
+        		filteredString[0] = splitId[splitId.length - 1]; // Ontology name (for subscription to an ontology)
+    		}
+    		
 		}else{
 			if (thingId.contains("/")) {
-				filteredString = thingId.replace("/", "-");
+				filteredString = new String[1];
+				filteredString[0] = thingId.replace("/", "-");
 			}
 			if (thingId.contains("#")) {
-				filteredString = thingId.replace("#", "+");
+				filteredString = new String[1];
+				filteredString[0] = thingId.replace("#", "+");
 			}
 		}
     	

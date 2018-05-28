@@ -37,6 +37,18 @@
     		<artifactId>syntactic-translators</artifactId>
     		<version>1.0</version>
         </dependency>
+        
+        <!-- SOFIA2 API -->
+   <!--     <dependency>
+			<groupId>com.indra.jee.arq.spring</groupId>
+			<artifactId>ssap</artifactId>
+			<version>2.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.indra.sofia2.ssap</groupId>
+			<artifactId>client-api</artifactId>
+			<version>3.4.0</version>
+		</dependency> -->
 		
         <!-- Test dependencies -->
         <dependency>

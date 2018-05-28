@@ -50,12 +50,12 @@ public class Sofia2Client {
 	private String sessionKey;
 	private String KP;
 	private String deviceOntologyName;
-	private String deviceIdentifier;
+//	private String deviceIdentifier;
 	private String identifierType;
 	private final String STRING_TYPE = "string"; 
 	private String TOKEN;
 	private String sofiaUser, sofiaPassword;
-	private int msRefresh = 100000;
+	private int msRefresh = 10000;
 	
 	Sofia2Client(Properties properties, String baseUrl) throws Exception{
 		try {
@@ -66,7 +66,7 @@ public class Sofia2Client {
             url = baseUrl;
             KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP", "activage"); // TODO: CREATE KP IN SOFIA2 PLATFORM
             deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
-            deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier");
+//            deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier");
             identifierType = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier-type", STRING_TYPE);
             
          // THIS IS A HACK TO AVOID PROBLEMS WITH SSL CERTIFICATE HOSTNAME VERIFICATION
@@ -127,9 +127,9 @@ public class Sofia2Client {
             throw new Exception("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
         }
 		
-		if(Strings.isNullOrEmpty(deviceOntologyName) || Strings.isNullOrEmpty(deviceIdentifier)) {
-			throw new BridgeException("Invalid SOFIA2 bridge configuration.");
-		}
+//		if(Strings.isNullOrEmpty(deviceOntologyName) || Strings.isNullOrEmpty(deviceIdentifier)) {
+//			throw new BridgeException("Invalid SOFIA2 bridge configuration.");
+//		}
 		
 		if (Strings.isNullOrEmpty(TOKEN) && (Strings.isNullOrEmpty(sofiaUser) || Strings.isNullOrEmpty(sofiaPassword))) {
             throw new BridgeException("Invalid SOFIA2 bridge configuration.");
@@ -287,10 +287,10 @@ public class Sofia2Client {
 		
 	}
 	
-	String query(String id) throws Exception{
-		// PERHAPS THIS METHOD SHOULD CALL  GET /api_ssap/v01/SSAPResource/{oid} INSTEAD
-		return query(deviceOntologyName, deviceIdentifier, id); // TODO: LOOK FOR A MORE APPROPRIATE QUERY
-	}
+//	String query(String id) throws Exception{
+//		// PERHAPS THIS METHOD SHOULD CALL  GET /api_ssap/v01/SSAPResource/{oid} INSTEAD
+//		return query(deviceOntologyName, deviceIdentifier, id); // TODO: LOOK FOR A MORE APPROPRIATE QUERY
+//	}
 	
 	String list(String ontName) throws Exception{
 		// List all instances of an ontology
@@ -315,15 +315,15 @@ public class Sofia2Client {
 		return list(deviceOntologyName);
 	}
 	
-	void register(String thingId) throws Exception{
-		String data = query(thingId);
-		if (data.equals("[ ]")){
-			// Entity does not exist. Call insert method
-			// TODO: CREATE JSON OBJECT THAT REPRESENTS THE THING IN SOFIA2 AND CALL INSERT METHOD
-			throw new Exception("Thing does not exist");
+//	void register(String thingId) throws Exception{
+//		String data = query(thingId);
+//		if (data.equals("[ ]")){
+//			// Entity does not exist. Call insert method
+//			// TODO: CREATE JSON OBJECT THAT REPRESENTS THE THING IN SOFIA2 AND CALL INSERT METHOD
+//			throw new Exception("Thing does not exist");
 //			insert(ontName, data);
-		}
-	}
+//		}
+//	}
 	
 	void insert(String ontName, String data) throws Exception{
 		// TODO: FORMAT DATA AS A JSON OBJECT
@@ -337,9 +337,9 @@ public class Sofia2Client {
 		invoke(queryURL, "POST", ssapResource);
 	}
 	
-	String subscribe(String id, String callback) throws Exception{
-		return subscribe(deviceOntologyName, deviceIdentifier, id, callback);
-	}
+//	String subscribe(String id, String callback) throws Exception{
+//		return subscribe(deviceOntologyName, deviceIdentifier, id, callback);
+//	}
 	
 	String subscribe(String ontName, String fieldName, String fieldValue, String callback) throws Exception{
 		String query;
@@ -399,10 +399,10 @@ public class Sofia2Client {
 		
 	}	
 	
-	void delete(String thingId) throws Exception{
-		// PERHAPS THIS METHOD SHOULD CALL  DELETE /api_ssap/v01/SSAPResource/{oid} INSTEAD
-		delete(deviceOntologyName, deviceIdentifier, thingId);
-	}
+//	void delete(String thingId) throws Exception{
+//		// PERHAPS THIS METHOD SHOULD CALL  DELETE /api_ssap/v01/SSAPResource/{oid} INSTEAD
+//		delete(deviceOntologyName, deviceIdentifier, thingId);
+//	}
 	
 	void delete(String ontName, String fieldName, String fieldValue) throws Exception{
 				

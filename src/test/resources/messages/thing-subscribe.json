@@ -14,7 +14,7 @@
     "@id" : "InterIoTMsg:metadata"
   }, {
     "@graph" : [ {
-      "@id" : "http://inter-iot.eu/dev/example-sensor",
+      "@id" : "http://inter-iot.eu/dev/SensorTemperatura/identificador#example-sensor",
       "@type" : "http://purl.oclc.org/NET/ssnx/ssn#Device",
       "InterIoT:GOIoTP#hasName" : "",
       "http://www.w3.org/ns/sosa/isHostedBy" : {
