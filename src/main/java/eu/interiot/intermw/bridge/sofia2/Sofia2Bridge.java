@@ -18,6 +18,7 @@
  */
 package eu.interiot.intermw.bridge.sofia2;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -25,7 +26,10 @@ import eu.interiot.intermw.bridge.abstracts.AbstractBridge;
 import eu.interiot.intermw.bridge.exceptions.BridgeException;
 import eu.interiot.intermw.commons.exceptions.MiddlewareException;
 import eu.interiot.intermw.commons.interfaces.Configuration;
+import eu.interiot.intermw.commons.model.IoTDevice;
 import eu.interiot.intermw.commons.model.Platform;
+import eu.interiot.intermw.commons.requests.PlatformCreateDeviceReq;
+import eu.interiot.intermw.commons.requests.SubscribeReq;
 import eu.interiot.message.ID.EntityID;
 import eu.interiot.message.Message;
 import eu.interiot.message.MessageMetadata;
@@ -43,11 +47,13 @@ import spark.Spark;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-@eu.interiot.intermw.bridge.annotations.Bridge(platformType = "sofia2")
+//@eu.interiot.intermw.bridge.annotations.Bridge(platformType = "sofia2")
+@eu.interiot.intermw.bridge.annotations.Bridge(platformType = "http://inter-iot.eu/sofia2")
 public class Sofia2Bridge extends AbstractBridge {
     private final Logger logger = LoggerFactory.getLogger(Sofia2Bridge.class);
     final static String PROPERTIES_PREFIX = "sofia2-";
@@ -62,8 +68,8 @@ public class Sofia2Bridge extends AbstractBridge {
         logger.debug("SOFIA2 bridge is initializing...");
         Properties properties = configuration.getProperties();
         try {
-//            bridgeCallbackUrl = new URL(configuration.getProperty(PROPERTIES_PREFIX + "callback-address"));
-            bridgeCallbackUrl = new URL(configuration.getProperty("bridge.callback.address")); // SAME CALLBACK FOR ALL THE BRIDGES IN ONE INSTANCE OF AIoTES
+            bridgeCallbackUrl = new URL(configuration.getProperty(PROPERTIES_PREFIX + "callback-address"));
+//            bridgeCallbackUrl = new URL(configuration.getProperty("bridge.callback.address")); // SAME CALLBACK FOR ALL THE BRIDGES IN ONE INSTANCE OF AIoTES
         } catch (Exception e) {
             throw new BridgeException("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
         }
@@ -73,7 +79,8 @@ public class Sofia2Bridge extends AbstractBridge {
         }
         
         try{
-        	client = new Sofia2Client(properties, platform.getBaseURL());
+//        	client = new Sofia2Client(properties, platform.getBaseURL()); // updated to v2.1.0
+        	client = new Sofia2Client(properties, platform.getBaseEndpoint().toString());
         }catch (Exception e) {
         	throw new BridgeException(e);
         }
@@ -86,11 +93,13 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message registerPlatform(Message message) throws Exception {
 		// SSAP JOIN
 		Message responseMessage = createResponseMessage(message);
-		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform);
-        if (entityIDs.size() != 1) {
-            throw new BridgeException("Missing platform ID.");
-        }
-        String platformId = entityIDs.iterator().next();
+//		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform);
+//        if (entityIDs.size() != 1) {
+//            throw new BridgeException("Missing platform ID.");
+//        }
+//        String platformId = entityIDs.iterator().next();
+        
+        String platformId = platform.getPlatformId();
         logger.debug("Registering platform {}...", platformId);
         try {
 			client.join();
@@ -133,7 +142,11 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message subscribe(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR TO GENERATE SUBSCRIBE QUERY FOR SOFIA2
 		Message responseMessage = createResponseMessage(message);
-		Set<String> entities = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypeDevice);
+		List<String> entities;
+		SubscribeReq subsreq = new SubscribeReq(message);
+		entities = subsreq.getDeviceIds();
+		
+//		Set<String> entities = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypeDevice);
 		if (entities.isEmpty()) {
             throw new PayloadException("No entities of type Device found in the Payload.");
         } else if (entities.size() > 1) {
@@ -148,8 +161,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	    
 		try{
 			Sofia2Translator translator = new Sofia2Translator();
-//			String endpoint = conversationId; // UNIQUE ENDPOINT
-			String endpoint = "endpoint";
+			String endpoint = conversationId; // UNIQUE ENDPOINT
 			
 			URL callbackUrl = new URL(bridgeCallbackUrl, endpoint);
 			String subId = "";
@@ -163,19 +175,34 @@ public class Sofia2Bridge extends AbstractBridge {
 //			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
 			subscriptionIds.put(conversationId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD. UNSUBSCRIBE MESSAGE CONTAINS CONVERSATIONID
 			
-			Spark.put(endpoint, (request, response) -> { // SOFIA2 sends data using a HTTP PUT query
+			Spark.post(endpoint, (request, response) -> {
 	            logger.debug("Received observation from the platform.");
 	            PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
 	            metadata.initializeMetadata();
 	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.OBSERVATION);
 	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.RESPONSE);
-	            metadata.setSenderPlatformId(new EntityID(platform.getId().getId()));
-	            metadata.setConversationId(conversationId);
+//	            metadata.setSenderPlatformId(new EntityID(platform.getId().getId())); // Updated to v2.1.0
+	            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
+	            metadata.setConversationId(conversationId);        
 	            
 	            JsonParser parser = new JsonParser();
 	    		JsonObject ssapObject = parser.parse(request.body().toString()).getAsJsonObject();
-	    		String observation = ssapObject.get("data").getAsString();
-	            
+	    		
+	    		System.out.println(request.body().toString());
+	    		String observation;
+	    		if (ssapObject.has("version") && ssapObject.get("version").getAsString().equals("LEGACY")){
+	    			JsonObject body = ssapObject.get("body").getAsJsonObject();
+	    			System.out.println("Received data: " + body.toString());
+		    		observation = body.get("data").getAsString();
+		    		System.out.println("Received data: " + observation);
+	    		}else{
+	    			JsonObject body = parser.parse(ssapObject.get("body").getAsString()).getAsJsonObject();
+		    		observation = body.get("data").getAsString();
+		    		System.out.println("Received data: " + observation);
+//		    		JsonArray array = parser.parse("[" + observation + "]").getAsJsonArray(); // SOFIA2 returns the new value and the last value
+//		    		observation = array.get(0).getAsJsonObject().toString(); // Get only the new value
+	    		}
+	    			    		
 	            Model translatedModel = translator.toJenaModel(observation);
 	    		// Create a new message payload for the response message
 	    		MessagePayload responsePayload = new MessagePayload(translatedModel);
@@ -296,24 +323,35 @@ public class Sofia2Bridge extends AbstractBridge {
 	}
 	
 	@Override
-	public Message platformCreateDevice(Message message) throws Exception {
+	public Message platformCreateDevices(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR
 		Message responseMessage = createResponseMessage(message);
 //		Sofia2Translator translator = new Sofia2Translator();
 		try{
 //			String body = translator.toFormatX(message.getPayload().getJenaModel());
 			
-			Set<String> entityIds = Sofia2Utils.getEntityIds(message);
-
-			for (String entityId : entityIds) {
-				String thingId[] = Sofia2Utils.filterThingID(entityId);
-				logger.debug("Registering thing {}...", entityId);
-//				client.register(thingId); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
+//			Set<String> entityIds = Sofia2Utils.getEntityIds(message);
+//			for (String entityId : entityIds) {
+//				String thingId[] = Sofia2Utils.filterThingID(entityId);
+//				logger.debug("Registering thing {}...", entityId);
+//				client.register(thingId[0], thingId[1], thingId[2]); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
 //	    		logger.debug("Success");
-				logger.debug("Unsupported method: Platform create device");
-			}
+//				logger.debug("Unsupported method: Platform create device");
+//			}
+			
+			PlatformCreateDeviceReq req = new PlatformCreateDeviceReq(message);
+			// TODO: FIND A BETTER WAY TO DO THIS
+			for (IoTDevice iotDevice : req.getDevices()) {
+				String thingId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
+	            logger.debug("Sending create-device (start-to-manage) request to the platform for device {}...", iotDevice.getDeviceId());
+	            System.out.println("Sending create-device (start-to-manage) request to the platform for device {}... " + thingId[0] + "." + thingId[1] + ":" + thingId[2]);
+	            client.register(thingId[0], thingId[1], thingId[2]); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
+	    		logger.debug("Success");  
+	        }
+			
+			
     	}catch(Exception e){
-    		logger.error("Error creating devices: " + e.getMessage());
+    		logger.error("Error registering devices: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
@@ -323,14 +361,14 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	
 	@Override
-	public Message platformUpdateDevice(Message message) throws Exception {
+	public Message platformUpdateDevices(Message message) throws Exception {
 		// TODO
 		// USE SOFIA2 TRANSLATOR TO GENERATE UPDATE MESSAGE DATA
 		return null;
 	}
 	
 	@Override
-	public Message platformDeleteDevice(Message message) throws Exception {
+	public Message platformDeleteDevices(Message message) throws Exception {
 		// TODO: CHECK DEVICE ID
 		Message responseMessage = createResponseMessage(message);
 		try {

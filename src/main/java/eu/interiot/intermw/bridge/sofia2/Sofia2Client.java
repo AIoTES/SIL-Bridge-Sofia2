@@ -36,6 +36,9 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -55,7 +58,9 @@ public class Sofia2Client {
 	private final String STRING_TYPE = "string"; 
 	private String TOKEN;
 	private String sofiaUser, sofiaPassword;
-	private int msRefresh = 10000;
+	private int msRefresh = 0;
+	
+	private final Logger logger = LoggerFactory.getLogger(Sofia2Client.class);
 	
 	Sofia2Client(Properties properties, String baseUrl) throws Exception{
 		try {
@@ -178,9 +183,8 @@ public class Sofia2Client {
 		int responseCode = 0;
 		try{
 			con.setDoInput(true);
-			con.setUseCaches(false);
 			con.setRequestMethod("GET");
-			con.setRequestProperty("Accept", "application/json; charset=UTF-8"); 
+			con.setRequestProperty("Accept", "application/json"); 
 			con.connect();
 			responseCode = con.getResponseCode();
 		}catch(Exception ex){
@@ -272,13 +276,22 @@ public class Sofia2Client {
 		// TODO: ADD MORE QUERIES
 		
 		String queryUrl = url + "sib/services/api_ssap/v01/SSAPResource";
+		String query;
+		
+		if(identifierType.equals(STRING_TYPE)) query = "\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
+		else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
 		
 		String params = "?$sessionKey=" + sessionKey;
 		params = params + "&$ontology=" + ontName;
-		if(identifierType.equals(STRING_TYPE)) params = params + "&$query={\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
-		else params = params + "&$query={\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
+				
+//		if(identifierType.equals(STRING_TYPE)) params = params + "&$query={\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
+//		else params = params + "&$query={\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
+		
+		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); // TODO: CHECK IF THIS WORKS ON THE SERVER
 		params = params + "&$queryType=NATIVE";
+		logger.debug("Query: " + queryUrl + params);
 		String response = invokeGet(queryUrl + params);
+		logger.debug("Response: " + response);
 		JsonParser parser = new JsonParser();
 		JsonObject ssapObject = parser.parse(response.toString()).getAsJsonObject();
 		String data = ssapObject.get("data").getAsString();
@@ -315,15 +328,15 @@ public class Sofia2Client {
 		return list(deviceOntologyName);
 	}
 	
-//	void register(String thingId) throws Exception{
-//		String data = query(thingId);
-//		if (data.equals("[ ]")){
-//			// Entity does not exist. Call insert method
-//			// TODO: CREATE JSON OBJECT THAT REPRESENTS THE THING IN SOFIA2 AND CALL INSERT METHOD
-//			throw new Exception("Thing does not exist");
+	void register(String ontName, String fieldName, String thingId) throws Exception{
+		String data = query(ontName, fieldName, thingId);
+		if (data.equals("[ ]")){
+			// Entity does not exist. Call insert method
+			// TODO: CREATE JSON OBJECT THAT REPRESENTS THE THING IN SOFIA2 AND CALL INSERT METHOD
+			throw new Exception("Thing does not exist");
 //			insert(ontName, data);
-//		}
-//	}
+		}
+	}
 	
 	void insert(String ontName, String data) throws Exception{
 		// TODO: FORMAT DATA AS A JSON OBJECT
@@ -365,7 +378,7 @@ public class Sofia2Client {
 		params = params + "&$queryType=SQLLIKE"; //SQLLIKE
 		params = params + "&$endpoint=" + callback;
 		
-		System.out.println(queryUrl + params);
+		logger.debug("Subscription query: " + queryUrl + params);
 		
 		String responseBody = invokeGet(queryUrl + params);
 		

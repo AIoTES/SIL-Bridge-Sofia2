@@ -40,7 +40,8 @@ public class Sofia2Utils {
 
 	
 	public static String getPlatformId(Platform platform){
-		return platform.getId().getId();
+//		return platform.getId().getId(); // THIS NO LONGER WORKS
+		return platform.getPlatformId();
 	}
 			  
     public static Set<EntityID> getEntityIDsFromPayloadAsEntityIDSet(MessagePayload payload, String entityType) {

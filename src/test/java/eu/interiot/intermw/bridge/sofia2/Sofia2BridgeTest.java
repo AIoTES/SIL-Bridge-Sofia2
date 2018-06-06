@@ -67,9 +67,9 @@ public class Sofia2BridgeTest {
         String platformRegisterJson = Resources.toString(url1, Charsets.UTF_8);
         Message platformRegisterMsg = new Message(platformRegisterJson);
 
- //       URL url2 = Resources.getResource("messages/thing-register.json");
- //       String thingRegisterJson = Resources.toString(url2, Charsets.UTF_8);
- //       Message thingRegisterMsg = new Message(thingRegisterJson);
+        URL url2 = Resources.getResource("messages/thing-register.json");
+        String thingRegisterJson = Resources.toString(url2, Charsets.UTF_8);
+        Message thingRegisterMsg = new Message(thingRegisterJson);
 
         URL url3 = Resources.getResource("messages/thing-subscribe.json");
         String thingSubscribeJson = Resources.toString(url3, Charsets.UTF_8);
@@ -77,14 +77,23 @@ public class Sofia2BridgeTest {
 
         // create Platform object using platform-register message
         EntityID platformId = platformRegisterMsg.getMetadata().asPlatformMessageMetadata().getReceivingPlatformIDs().iterator().next();
-        Platform platform = new Platform(platformId.toString(), platformRegisterMsg.getPayload());
+//        Platform platform = new Platform(platformId.toString(), platformRegisterMsg.getPayload());
+        Platform platform = new Platform();
+        platform.setPlatformId(platformId.toString());
+        // SHOULD GET THESE VALUES FROM THE MESSAGE (AND SOME OF THEM FROM PROPERTIES)
+        platform.setClientId("test");
+        platform.setName("Example Platform #1");
+        platform.setType("sofia2");
+        platform.setBaseEndpoint(new URL("http://localhost:4569/"));
+        platform.setLocation("http://test.inter-iot.eu/TestLocation");
 
         Sofia2Bridge sofiaBridge = new Sofia2Bridge(configuration, platform);
         PublisherMock<Message> publisher = new PublisherMock<>();
         sofiaBridge.setPublisher(publisher);
 
         // register platform
-        sofiaBridge.send(platformRegisterMsg);
+//        sofiaBridge.send(platformRegisterMsg);
+        sofiaBridge.process(platformRegisterMsg);
         Message responseMsg = publisher.retrieveMessage();
         Set<MessageTypesEnum> messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
@@ -92,13 +101,15 @@ public class Sofia2BridgeTest {
         
         // register thing
 //        sofiaBridge.send(thingRegisterMsg);
-//        Message responseMsg2 = publisher.retrieveMessage();
-//        Set<MessageTypesEnum> messageTypesEnumSet2 = responseMsg2.getMetadata().getMessageTypes();
-//        assertTrue(messageTypesEnumSet2.contains(MessageTypesEnum.RESPONSE));
-//        assertTrue(messageTypesEnumSet2.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_CREATE_DEVICE));
+        sofiaBridge.process(thingRegisterMsg);
+        Message responseMsg2 = publisher.retrieveMessage();
+        Set<MessageTypesEnum> messageTypesEnumSet2 = responseMsg2.getMetadata().getMessageTypes();
+        assertTrue(messageTypesEnumSet2.contains(MessageTypesEnum.RESPONSE));
+        assertTrue(messageTypesEnumSet2.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_CREATE_DEVICE));
 
         // subscribe to thing
-        sofiaBridge.send(thingSubscribeMsg);
+//        sofiaBridge.send(thingSubscribeMsg);
+        sofiaBridge.process(thingSubscribeMsg);
         responseMsg = publisher.retrieveMessage();
         messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));

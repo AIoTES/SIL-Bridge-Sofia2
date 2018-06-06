@@ -46,6 +46,7 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
     private String userURI;
     private String kpURI;
     private String kpInstanceURI;
+    private String timezoneIdURI;
     /////////////////////////////////
     
     private Property hasId;
@@ -71,6 +72,7 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
     private Property hasUser;
     private Property hasKp;
     private Property hasKpInstance;
+    private Property hasTimezoneId;
     /////////////////////////////////
     
     
@@ -103,6 +105,7 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         setUserURI(getBaseURI() + "hasUser");
         setKpURI(getBaseURI() + "hasKp");
         setKpInstanceURI(getBaseURI() + "hasKpInstance");
+        setTimezoneIdURI(getBaseURI() + "hasTimezoneId");
         ////////////////////////////////////
         
         Model jenaModel = ModelFactory.createDefaultModel();
@@ -130,6 +133,7 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         hasUser = jenaModel.createProperty(getUserURI());
         hasKp = jenaModel.createProperty(getKpURI());
         hasKpInstance = jenaModel.createProperty(getKpInstanceURI());
+        hasTimezoneId = jenaModel.createProperty(getTimezoneIdURI());
         ///////////////////////////////
         
     }
@@ -173,12 +177,15 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
                 JsonNode idNode = field.getValue();
                 objectResource.addProperty(hasId, idNode.get("$oid").asText());
             } else if (field.getKey().equals("contextData")) {
-                objectResource.addProperty(hasSessionKey, field.getValue().get("session_key").asText());
+                if(field.getValue().has("session_key")) objectResource.addProperty(hasSessionKey, field.getValue().get("session_key").asText());
+                else if (field.getValue().has("sessionKey")) objectResource.addProperty(hasSessionKey, field.getValue().get("sessionKey").asText()); // Indication message
                 objectResource.addProperty(hasUser, field.getValue().get("user").asText());
                 objectResource.addProperty(hasKp, field.getValue().get("kp").asText());
-                objectResource.addProperty(hasKpInstance, field.getValue().get("kp_instancia").asText());
+                if(field.getValue().has("kp_instancia")) objectResource.addProperty(hasKpInstance, field.getValue().get("kp_instancia").asText());
+                else if (field.getValue().has("kpInstance")) objectResource.addProperty(hasKpInstance, field.getValue().get("kpInstance").asText()); // Indication message
                 JsonNode timeNode = field.getValue().get("timestamp");
                 objectResource.addProperty(hasTimestamp, timeNode.get("$date").asText());
+                if(field.getValue().has("timezoneId")) objectResource.addProperty(hasTimezoneId, field.getValue().get("timezoneId").asText());
             } else {
                 //Add attribute to object
             	// JSON OBJECT OR ONTOLOGY INSTANCE. IF IT'S AN ONTOLOGY INSTANCE, TRANSLATE AS "hasType" + OTHER ATTRIBUTES
@@ -415,6 +422,12 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         	ObjectNode dateNode = mapper.createObjectNode();
         	dateNode.put("$date", value);
         	contextData.set("timestamp", dateNode);
+        }
+        
+        nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasTimezoneId);
+        if (nodeIterator.hasNext()) {
+        	value = nodeIterator.next().toString();
+        	contextData.put("timezoneId", value);
         }
         
         nodeIterator = jenaModel.listObjectsOfProperty(entityResource, hasUser);
@@ -766,5 +779,12 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         return kpInstanceURI;
     }
     
+    public void setTimezoneIdURI(String timezoneIdURI) {
+        this.timezoneIdURI = timezoneIdURI;
+    }
+    
+    public String getTimezoneIdURI() {
+        return timezoneIdURI;
+    }
     
 }

@@ -24,7 +24,7 @@ import com.google.common.io.Resources;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -100,6 +100,7 @@ public class Sofia2PlatformEmulator {
                 sessionKey = request.queryParams("$sessionKey");
             	query = request.queryParams("$query");
             	ontology = request.queryParams("$ontology");
+            	System.out.println("**** RECEIVED QUERY REQUEST ****");
             	System.out.println("Query parameters");
                 System.out.println("Ontology: " + ontology);
                 System.out.println("Query: " + query);
@@ -184,7 +185,7 @@ public class Sofia2PlatformEmulator {
 
         public ObservationsPublisher(Subscription subscription) throws Exception {
             this.subscription = subscription;
-            URL url = Resources.getResource("observations/example-observation.json");
+            URL url = Resources.getResource("observations/example-indication.json");
             observation = Resources.toString(url, Charsets.UTF_8);
         }
 
@@ -199,10 +200,11 @@ public class Sofia2PlatformEmulator {
 
             while (!Thread.interrupted()) {
                 try {
-                	HttpPut httpPut = new HttpPut(subscription.getCallbackUrl());
+//                	HttpPut httpPut = new HttpPut(subscription.getCallbackUrl());
+                	HttpPost httpPost = new HttpPost(subscription.getCallbackUrl());
                     HttpEntity httpEntity = new StringEntity(observation, ContentType.getByMimeType("application/json"));
-                    httpPut.setEntity(httpEntity);
-                    HttpResponse response = httpClient.execute(httpPut);
+                    httpPost.setEntity(httpEntity);
+                    HttpResponse response = httpClient.execute(httpPost);
                     logger.debug("Observation for thing {} has been sent to {}.", subscription.getSubscriptionQuery(),
                             subscription.getCallbackUrl());
                     if(response.getStatusLine().getStatusCode() == 200){
@@ -211,6 +213,7 @@ public class Sofia2PlatformEmulator {
                     }
                 } catch (Exception e) {
                     logger.error("Failed to send observation to {}.", subscription.getCallbackUrl());
+                    e.printStackTrace();
                 }
                 try {
                     Thread.sleep(observationsDelay * 1000);
