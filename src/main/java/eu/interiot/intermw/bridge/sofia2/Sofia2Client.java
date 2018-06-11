@@ -58,8 +58,8 @@ public class Sofia2Client {
 	private final String STRING_TYPE = "string"; 
 	private String TOKEN;
 	private String sofiaUser, sofiaPassword;
-	private int msRefresh = 0;
-	
+	private int msRefresh = 0; // TODO: Add to properties?
+	Thread sessionRefresh;
 	private final Logger logger = LoggerFactory.getLogger(Sofia2Client.class);
 	
 	Sofia2Client(Properties properties, String baseUrl) throws Exception{
@@ -73,6 +73,24 @@ public class Sofia2Client {
             deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
 //            deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier");
             identifierType = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier-type", STRING_TYPE);
+            sessionKey = null;
+            
+            sessionRefresh = new Thread(){
+				public void run(){
+					
+					while(!this.isInterrupted()){
+						 try {
+							Thread.sleep(600000);
+							join();
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}catch (Exception ex) {
+							ex.printStackTrace();
+							Thread.currentThread().interrupt();
+						} 
+					}
+				}
+			};
             
          // THIS IS A HACK TO AVOID PROBLEMS WITH SSL CERTIFICATE HOSTNAME VERIFICATION
     		javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
@@ -250,6 +268,7 @@ public class Sofia2Client {
 		ssapResource.addProperty("join", true);
 		ssapResource.addProperty("instanceKP", KP +":"+ KpInstance);
 		ssapResource.addProperty("token", TOKEN);
+		if ((sessionKey != null) && (!sessionKey.equals(""))) ssapResource.addProperty("sessionKey", sessionKey); // Refresh session
 		
 		String responseJoin = invoke(queryURL, "POST", ssapResource);
 		JsonParser parser = new JsonParser();
@@ -258,6 +277,8 @@ public class Sofia2Client {
 
 		if ((sessionKey == null) || (sessionKey.equals(""))) {
 			throw new Exception("JOIN operation failed");
+		}else{
+			sessionRefresh.start();
 		}
 		
 	}
@@ -268,6 +289,7 @@ public class Sofia2Client {
 		ssapResource.addProperty("leave", true);
 		ssapResource.addProperty("sessionKey", sessionKey);
 		sessionKey = null;
+		sessionRefresh.interrupt();
 		invoke(queryURL, "POST", ssapResource);
 	}
 	
