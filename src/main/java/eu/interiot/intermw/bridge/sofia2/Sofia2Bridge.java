@@ -131,7 +131,6 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message subscribe(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR TO GENERATE SUBSCRIBE QUERY FOR SOFIA2 (?)
 		Message responseMessage = createResponseMessage(message);
-		List<String> entities;
 		SubscribeReq subsreq = new SubscribeReq(message);
 		String conversationId = message.getMetadata().getConversationId().orElse(null);
 		String endpoint = conversationId; // UNIQUE ENDPOINT
@@ -157,14 +156,8 @@ public class Sofia2Bridge extends AbstractBridge {
 //				}
             	if(subId != null) subIds.add(subId);
         	}
-		}catch (Exception e){ 
-			logger.error("Error subscribing: " + e.getMessage());
-			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
-			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
-		}
-		
-		try{
+			
+			
 			Sofia2Translator translator = new Sofia2Translator();
 			
 			subscriptionIds.put(conversationId, subIds); // SUBSCRIPTION ID IS NEEDED FOR UNSUBSCRIBE METHOD. UNSUBSCRIBE MESSAGE CONTAINS CONVERSATIONID
@@ -211,13 +204,13 @@ public class Sofia2Bridge extends AbstractBridge {
 	            return "";
 	        });
 			
-		} catch (Exception e){ 
+		}catch (Exception e){ 
 			logger.error("Error subscribing: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
-
+		
 		return responseMessage;
 	}
 
@@ -225,9 +218,8 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message unsubscribe(Message message) throws Exception {
 		Message responseMessage = createResponseMessage(message);
-//		String conversationId = message.getMetadata().getConversationId().orElse(null);
-		 UnsubscribeReq req = new UnsubscribeReq(message);
-	     String conversationId = req.getConversationId();
+		UnsubscribeReq req = new UnsubscribeReq(message);
+	    String conversationId = req.getConversationId();
 		
 		try{
 			
@@ -355,7 +347,6 @@ public class Sofia2Bridge extends AbstractBridge {
 			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
 			for(String deviceId : deviceIds){
 				String[] transformedId = Sofia2Utils.filterThingID(deviceId);
-//				client.delete(transformedId);
 				client.delete(transformedId[0], transformedId[1], transformedId[2]);
 				logger.debug("Device {} has been removed.", deviceId);
 			}

@@ -67,11 +67,9 @@ public class Sofia2Client {
             sofiaUser = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "user"); // USER + PASSWORD OR TOKEN?
             sofiaPassword = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "password");
             TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
- //           url = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "address", DEFAULT_URL);
             url = baseUrl;
             KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP", "activage"); // TODO: CREATE KP IN SOFIA2 PLATFORM
             deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
-//            deviceIdentifier = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier");
             identifierType = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier-type", STRING_TYPE);
             sessionKey = null;
             
@@ -305,10 +303,6 @@ public class Sofia2Client {
 		
 		String params = "?$sessionKey=" + sessionKey;
 		params = params + "&$ontology=" + ontName;
-				
-//		if(identifierType.equals(STRING_TYPE)) params = params + "&$query={\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
-//		else params = params + "&$query={\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
-		
 		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); // TODO: CHECK IF THIS WORKS ON THE SERVER
 		params = params + "&$queryType=NATIVE";
 		logger.debug("Query: " + queryUrl + params);
@@ -322,10 +316,6 @@ public class Sofia2Client {
 		
 	}
 	
-//	String query(String id) throws Exception{
-//		// PERHAPS THIS METHOD SHOULD CALL  GET /api_ssap/v01/SSAPResource/{oid} INSTEAD
-//		return query(deviceOntologyName, deviceIdentifier, id); // TODO: LOOK FOR A MORE APPROPRIATE QUERY
-//	}
 	
 	String list(String ontName) throws Exception{
 		// List all instances of an ontology
@@ -372,9 +362,6 @@ public class Sofia2Client {
 		invoke(queryURL, "POST", ssapResource);
 	}
 	
-//	String subscribe(String id, String callback) throws Exception{
-//		return subscribe(deviceOntologyName, deviceIdentifier, id, callback);
-//	}
 	
 	String subscribe(String ontName, String fieldName, String fieldValue, String callback) throws Exception{
 		String query;
@@ -434,10 +421,6 @@ public class Sofia2Client {
 		
 	}	
 	
-//	void delete(String thingId) throws Exception{
-//		// PERHAPS THIS METHOD SHOULD CALL  DELETE /api_ssap/v01/SSAPResource/{oid} INSTEAD
-//		delete(deviceOntologyName, deviceIdentifier, thingId);
-//	}
 	
 	void delete(String ontName, String fieldName, String fieldValue) throws Exception{
 				
