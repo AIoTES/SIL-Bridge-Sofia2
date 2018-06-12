@@ -30,6 +30,7 @@ import eu.interiot.intermw.commons.model.IoTDevice;
 import eu.interiot.intermw.commons.model.Platform;
 import eu.interiot.intermw.commons.requests.PlatformCreateDeviceReq;
 import eu.interiot.intermw.commons.requests.SubscribeReq;
+import eu.interiot.intermw.commons.requests.UnsubscribeReq;
 import eu.interiot.message.ID.EntityID;
 import eu.interiot.message.Message;
 import eu.interiot.message.MessageMetadata;
@@ -46,20 +47,20 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-//@eu.interiot.intermw.bridge.annotations.Bridge(platformType = "sofia2")
 @eu.interiot.intermw.bridge.annotations.Bridge(platformType = "http://inter-iot.eu/sofia2")
 public class Sofia2Bridge extends AbstractBridge {
     private final Logger logger = LoggerFactory.getLogger(Sofia2Bridge.class);
     final static String PROPERTIES_PREFIX = "sofia2-";
-//    private URL bridgeCallbackUrl;
    
-	private Map<String,String> subscriptionIds = new HashMap<String,String>(); 
+//	private Map<String,String> subscriptionIds = new HashMap<String,String>();
+	private Map<String, List<String>> subscriptionIds = new HashMap<String,List<String>>();
     
     private Sofia2Client client;
 
@@ -67,12 +68,6 @@ public class Sofia2Bridge extends AbstractBridge {
         super(configuration, platform);
         logger.debug("SOFIA2 bridge is initializing...");
         Properties properties = configuration.getProperties();
-//        try {
-//            bridgeCallbackUrl = new URL(configuration.getProperty(PROPERTIES_PREFIX + "callback-address"));
-//            bridgeCallbackUrl = new URL(configuration.getProperty("bridge.callback.url")); // SAME CALLBACK FOR ALL THE BRIDGES IN ONE INSTANCE OF AIoTES
-//        } catch (Exception e) {
-//            throw new BridgeException("Failed to read SOFIA2 bridge configuration: " + e.getMessage());
-//        }
         
         if (bridgeCallbackUrl == null) { // From the AbstractBridge class
             throw new BridgeException("Invalid SOFIA2 bridge configuration.");
@@ -134,38 +129,45 @@ public class Sofia2Bridge extends AbstractBridge {
 
 	@Override
 	public Message subscribe(Message message) throws Exception {
-		// TODO: USE SOFIA2 TRANSLATOR TO GENERATE SUBSCRIBE QUERY FOR SOFIA2
+		// TODO: USE SOFIA2 TRANSLATOR TO GENERATE SUBSCRIBE QUERY FOR SOFIA2 (?)
 		Message responseMessage = createResponseMessage(message);
 		List<String> entities;
 		SubscribeReq subsreq = new SubscribeReq(message);
-		entities = subsreq.getDeviceIds();
+		String conversationId = message.getMetadata().getConversationId().orElse(null);
+		String endpoint = conversationId; // UNIQUE ENDPOINT
+		URL callbackUrl = new URL(bridgeCallbackUrl, endpoint);
+		List<String> subIds = new ArrayList<String>();
 		
-		if (entities.isEmpty()) {
-            throw new PayloadException("No entities of type Device found in the Payload.");
-        } else if (entities.size() > 1) {
-            throw new PayloadException("Only one device is supported by Subscribe operation.");
-        }
+		if (subsreq.getDeviceIds().isEmpty()) {
+          throw new PayloadException("No entities of type Device found in the Payload.");
+		}
+		// TODO: FIND A BETTER WAY TO DO THIS
+		try{
+			logger.debug("Subscribing to things using conversationId {}...", conversationId);
+			for (String deviceId : subsreq.getDeviceIds()) {
+				String thingId[] = Sofia2Utils.filterThingID(deviceId);
+				logger.debug("Sending Subscribe request to the platform for device {}...", deviceId);
+				System.out.println("Sending subscribe request to the platform for device {}... " + thingId[0] + "." + thingId[1] + ":" + thingId[2]);
+				String subId = "";
+            	if(thingId.length > 1){
+    				subId = client.subscribe(thingId[0], thingId[1], thingId[2], callbackUrl.toString()); // Subscription to a thing in SOFIA2
+    			}
+//				else{
+//            		subId = client.subscribe(thingId[thingId.length - 1], callbackUrl.toString()); // Subscription to an ontology?
+//				}
+            	if(subId != null) subIds.add(subId);
+        	}
+		}catch (Exception e){ 
+			logger.error("Error subscribing: " + e.getMessage());
+			responseMessage.getMetadata().setStatus("KO");
+			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+		}
 		
-		String devId = entities.iterator().next();
-		String[] thingId = Sofia2Utils.filterThingID(devId);
-	    String conversationId = message.getMetadata().getConversationId().orElse(null);
-	    logger.debug("Subscribing to thing {} using conversationId {}...", devId, conversationId);
-	    
 		try{
 			Sofia2Translator translator = new Sofia2Translator();
-			String endpoint = conversationId; // UNIQUE ENDPOINT
 			
-			URL callbackUrl = new URL(bridgeCallbackUrl, endpoint);
-			String subId = "";
-			if(thingId.length > 1){
-				subId = client.subscribe(thingId[0], thingId[1], thingId[2], callbackUrl.toString()); // Subscription to a thing in SOFIA2
-			}
-//			else{
-//				subId = client.subscribe(thingId[thingId.length - 1], callbackUrl.toString()); // Subscription to an ontology?
-//			}
-			
-//			subscriptionIds.put(thingId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD
-			subscriptionIds.put(conversationId, subId); // SUBSCRIPTION ID IS NEEDER FOR UNSUBSCRIBE METHOD. UNSUBSCRIBE MESSAGE CONTAINS CONVERSATIONID
+			subscriptionIds.put(conversationId, subIds); // SUBSCRIPTION ID IS NEEDED FOR UNSUBSCRIBE METHOD. UNSUBSCRIBE MESSAGE CONTAINS CONVERSATIONID
 			
 			Spark.post(endpoint, (request, response) -> {
 	            logger.debug("Received observation from the platform.");
@@ -223,20 +225,23 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message unsubscribe(Message message) throws Exception {
 		Message responseMessage = createResponseMessage(message);
-		String conversationId = message.getMetadata().getConversationId().orElse(null);
+//		String conversationId = message.getMetadata().getConversationId().orElse(null);
+		 UnsubscribeReq req = new UnsubscribeReq(message);
+	     String conversationId = req.getConversationId();
 		
 		try{
 			
 			logger.info("Unsubscribing from things in conversation {}...", conversationId);
-			String subId = subscriptionIds.get(conversationId); // RETRIEVE SUBSCRIPTION ID
-			String responseBody = client.unsubscribe(subId);				
+			List<String> subId = subscriptionIds.get(conversationId); // RETRIEVE SUBSCRIPTION IDs
+			for (String subscriptionId : subId){
+				try{
+					client.unsubscribe(subscriptionId);
+				}catch (Exception e){ // FIXME: The server sometimes returns a 500 code. It's probably a bug
+					logger.error("Error unsubscribing: " + e.getMessage());
+					e.printStackTrace();
+				}
+			}
 			subscriptionIds.remove(conversationId);
-			
-				// TODO: USE SOFIA2 TRANSLATOR
-//				Sofia2Translator translator = new Sofia2Translator();
-//				Model translatedModel = translator.toJenaModel(responseBody);			
-//				MessagePayload responsePayload = new MessagePayload(translatedModel);
-//				responseMessage.setPayload(responsePayload);
 			
 		} catch (Exception e){ 
 			logger.error("Error unsubscribing: " + e.getMessage());
@@ -307,7 +312,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message platformCreateDevices(Message message) throws Exception {
-		// TODO: USE SOFIA2 TRANSLATOR
+		// TODO: USE SOFIA2 TRANSLATOR (?)
 		Message responseMessage = createResponseMessage(message);
 //		Sofia2Translator translator = new Sofia2Translator();
 		try{

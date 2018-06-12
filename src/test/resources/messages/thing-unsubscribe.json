@@ -1,0 +1,27 @@
+{
+   "@graph" : [ {
+     "@graph" : [ {
+       "@id" : "InterIoTMsg:meta/cf2c677f-d2af-4b23-aded-0dd8cf2ef152",
+       "@type" : [ "InterIoTMsg:Unsubscribe", "InterIoTMsg:meta" ],
+       "InterIoTMsg:ReceiverPlatformId" : {
+         "@id" : "InterIoT:example-platform1"
+       },
+       "InterIoTMsg:clientID" : "myclient",
+       "InterIoTMsg:conversationID" : "conv614d3621-7399-45b1-bf2f-505b24045ea6",
+       "InterIoTMsg:dateTimeStamp" : "2018-06-11T15:24:17.151Z",
+       "InterIoTMsg:messageID" : "msg1bd8e5ca-4c35-4c05-888c-1b19e6e9d042"
+     } ],
+     "@id" : "InterIoTMsg:metadata"
+   }, {
+     "@graph" : [ {
+       "@id" : "http://inter-iot.eu/dev/SensorTemperatura/identificador#example-sensor",
+       "@type" : "InterIoT:GOIoTP#IoTDevice",
+       "InterIoT:conversationId" : "conv614d3621-7399-45b1-bf2f-505b24045ea6"
+     } ],
+     "@id" : "InterIoTMsg:payload"
+   } ],
+   "@context" : {
+     "InterIoTMsg" : "http://inter-iot.eu/message/",
+     "InterIoT" : "http://inter-iot.eu/"
+   }
+}

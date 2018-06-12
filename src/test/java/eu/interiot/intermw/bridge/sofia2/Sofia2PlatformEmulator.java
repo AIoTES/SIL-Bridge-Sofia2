@@ -142,18 +142,21 @@ public class Sofia2PlatformEmulator {
                 return e.getMessage();
             }
             
-            if (subscriptions.containsKey(subscriptionQuery)) {
+//            if (subscriptions.containsKey(subscriptionQuery)) {
+            if (subscriptions.containsKey(sessionKey)) {
                 response.status(409);
                 return "Already subscribed.";
             }
 
             Subscription subscription = new Subscription(subscriptionQuery, callbackUrl, sessionKey);
-            subscriptions.put(subscriptionQuery, subscription);
+ //           subscriptions.put(subscriptionQuery, subscription);
+            subscriptions.put(sessionKey, subscription);
 
             ObservationsPublisher obsPublisher = new ObservationsPublisher(subscription);
             Thread obsPublisherThread = new Thread(obsPublisher);
             obsPublisherThread.start();
-            subscriptionThreads.put(subscriptionQuery, obsPublisherThread);
+ //           subscriptionThreads.put(subscriptionQuery, obsPublisherThread);
+            subscriptionThreads.put(sessionKey, obsPublisherThread);
 
             logger.debug("Subscribed to thing '{}' with callback URL {}.", subscriptionQuery, callbackUrl);
             
@@ -163,8 +166,38 @@ public class Sofia2PlatformEmulator {
             response.status(200);
             return platformResponse;
         });
+        
+        spark.get("sib/services/api_ssap/v01/SSAPResource/unsubscribe", (request, response) -> {
+            logger.debug("Received UNSUBSCRIBE request.");
+            String sessionKey;
+            String subscriptionId;
+            try {
+            	sessionKey = request.queryParams("$sessionKey");
+            	subscriptionId = request.queryParams("$subscriptionId");
+            	System.out.println("Subscription parameters");
+                System.out.println("SubscriptionID: " + subscriptionId);
+                System.out.println("SessionKey: " + sessionKey);
+                System.out.println("*********");
+            } catch (Exception e) {
+                response.status(400);
+                return e.getMessage();
+            }
+            
+            subscriptions.remove(sessionKey);
 
-        logger.info("ExamplePlatformEmulator is listening on port {}.", port);
+            Thread obsPublisherThread = subscriptionThreads.get(sessionKey);
+            
+            obsPublisherThread.interrupt();
+            subscriptionThreads.remove(sessionKey);
+
+            logger.debug("Unubscribed from '{}' ", subscriptionId);
+            
+            URL url1 = Resources.getResource("observations/response-subscribe.json");
+       	 	String  platformResponse = Resources.toString(url1, Charsets.UTF_8);
+       	 	response.header("Content-Type", "application/json;charset=UTF-8");
+            response.status(200);
+            return platformResponse;
+        });
     }
 
     public void stop() {
