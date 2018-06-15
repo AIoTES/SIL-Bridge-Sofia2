@@ -36,7 +36,6 @@ import eu.interiot.message.Message;
 import eu.interiot.message.MessageMetadata;
 import eu.interiot.message.MessagePayload;
 import eu.interiot.message.managers.URI.URIManagerMessageMetadata;
-import eu.interiot.message.managers.URI.URIManagerMessageMetadata.MessageTypesEnum;
 import eu.interiot.message.exceptions.payload.PayloadException;
 import eu.interiot.message.metadata.PlatformMessageMetadata;
 import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
@@ -97,7 +96,7 @@ public class Sofia2Bridge extends AbstractBridge {
 			logger.error("Register Platform  " + e);
 			e.printStackTrace();
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
         return responseMessage;
@@ -121,7 +120,7 @@ public class Sofia2Bridge extends AbstractBridge {
 			logger.error("Unregister Platform  " + e);
 			e.printStackTrace();
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
         return responseMessage;
@@ -207,7 +206,7 @@ public class Sofia2Bridge extends AbstractBridge {
 		}catch (Exception e){ 
 			logger.error("Error subscribing: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
 		
@@ -239,7 +238,7 @@ public class Sofia2Bridge extends AbstractBridge {
 			logger.error("Error unsubscribing: " + e.getMessage());
 			e.printStackTrace();
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
 		
@@ -271,7 +270,7 @@ public class Sofia2Bridge extends AbstractBridge {
 		catch (Exception e) {
 			logger.error("Error in query: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
 		return responseMessage;
@@ -296,7 +295,7 @@ public class Sofia2Bridge extends AbstractBridge {
 		catch (Exception e) {
 			logger.error("Error in query: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
 		return responseMessage;
@@ -324,7 +323,7 @@ public class Sofia2Bridge extends AbstractBridge {
     	}catch(Exception e){
     		logger.error("Error registering devices: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
     	}
 		return responseMessage;
@@ -355,7 +354,7 @@ public class Sofia2Bridge extends AbstractBridge {
 		catch (Exception e) {
 			logger.error("Error removing devices: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
-			responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
 		}
 		return responseMessage;
@@ -380,7 +379,7 @@ public class Sofia2Bridge extends AbstractBridge {
 		logger.debug("Error occured in {}...", message);
 		Message responseMessage = createResponseMessage(message);
 		responseMessage.getMetadata().setStatus("KO");
-		responseMessage.getMetadata().setMessageType(MessageTypesEnum.ERROR);
+//		responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR); // Do we need to add the "error" type in this case ?
 		return responseMessage;
 	}
 
