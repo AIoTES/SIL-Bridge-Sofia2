@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.Socket;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -34,10 +33,8 @@ import java.util.Properties;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.slf4j.Logger;
@@ -96,119 +93,88 @@ public class Sofia2Client {
             
 			if(url.startsWith("https")){
 				 // THIS IS A HACK TO AVOID PROBLEMS WITH SSL CERTIFICATE HOSTNAME VERIFICATION
-	    		javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-	    			    new javax.net.ssl.HostnameVerifier(){
-	    			 
-	    			        public boolean verify(String hostname,
-	    			                javax.net.ssl.SSLSession sslSession) {
-	    			            if (hostname.contains("sofia2.televes")) {
-	    			                return true;
-	    			            }
-	    			            else if (hostname.equals("sofia2.com")){
-	    			            	return true;
-	    			            }
-	    			            else return false;
-	    			        }
-	    			    });
-	    		// THIS IS A HACK TO AVOID PROBLEMS WITH SSL SELF-SIGNED CERTIFICATES
-	    		 TrustManager[] trustAllCerts = new TrustManager[]{
-	                     new X509ExtendedTrustManager(){
-	                        @Override
-	                        public java.security.cert.X509Certificate[] getAcceptedIssuers(){
-	                             return null;
-	                        }
-	                        @Override
-	                        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType){}
-	                        @Override
-	                        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType){}
-	                        @Override
-	                        public void checkClientTrusted(java.security.cert.X509Certificate[] xcs, String string, SSLEngine ssle) throws CertificateException{}
-	                        @Override
-	                        public void checkServerTrusted(java.security.cert.X509Certificate[] xcs, String string, SSLEngine ssle) throws CertificateException{}
-							@Override
-							public void checkClientTrusted(X509Certificate[] arg0, String arg1, Socket arg2) throws CertificateException {}
-							@Override
-							public void checkServerTrusted(X509Certificate[] arg0, String arg1, Socket arg2) throws CertificateException {}
-	                     }
-	             };
-	            SSLContext sc = SSLContext.getInstance("SSL");
-	            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-	            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
-	    		// A better option if it works...
-//	    		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+//	    		javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+//	    			    new javax.net.ssl.HostnameVerifier(){
+//	    			 
+//	    			        public boolean verify(String hostname,
+//	    			                javax.net.ssl.SSLSession sslSession) {
+//	    			            if (hostname.contains("sofia2.televes")) {
+//	    			                return true;
+//	    			            }
+//	    			            else if (hostname.equals("sofia2.com")){
+//	    			            	return true;
+//	    			            }
+//	    			            else return false;
+//	    			        }
+//	    			    });
+	    		
+	    		// TO AVOID PROBLEMS WITH SSL SELF-SIGNED CERTIFICATES
+	    		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 	    			// Using null here initialises the TMF with the default trust store.
-//	    			tmf.init((KeyStore) null);
+	    			tmf.init((KeyStore) null);
 
 	    			// Get hold of the default trust manager
-//	    			X509TrustManager defaultTm = null;
-//	    			for (TrustManager tm : tmf.getTrustManagers()) {
-//	    			    if (tm instanceof X509TrustManager) {
-//	    			        defaultTm = (X509TrustManager) tm;
-//	    			        break;
-//	    			    }
-//	    			}
+	    			X509TrustManager defaultTm = null;
+	    			for (TrustManager tm : tmf.getTrustManagers()) {
+	    			    if (tm instanceof X509TrustManager) {
+	    			        defaultTm = (X509TrustManager) tm;
+	    			        break;
+	    			    }
+	    			}
 
-//	    			FileInputStream myKeys = new FileInputStream("/etc/inter-iot/intermw/bridgesTrustStore.jks");
+	    			FileInputStream myKeys = new FileInputStream("/etc/inter-iot/intermw/sofia2TrustStore.jks");
 
-	    			// Do the same with your trust store this time
-	    			// Adapt how you load the keystore to your needs
-//	    			KeyStore myTrustStore = KeyStore.getInstance("JKS");
-//	    			myTrustStore.load(myKeys, "activage".toCharArray());
-//	    			myKeys.close();
-//	    			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-//	    			tmf.init(myTrustStore);
+	    			// Custom trust store
+	    			KeyStore myTrustStore = KeyStore.getInstance("JKS");
+	    			myTrustStore.load(myKeys, "activage".toCharArray());
+	    			myKeys.close();
+	    			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+	    			tmf.init(myTrustStore);
 	    			
 	    			// Get hold of the default trust manager
-//	    			X509TrustManager myTm = null;
-//	    			for (TrustManager tm : tmf.getTrustManagers()) {
-//	    			    if (tm instanceof X509TrustManager) {
-//	    			        myTm = (X509TrustManager) tm;
-//	    			        break;
-//	    			    }
-//	    			}
+	    			X509TrustManager myTm = null;
+	    			for (TrustManager tm : tmf.getTrustManagers()) {
+	    			    if (tm instanceof X509TrustManager) {
+	    			        myTm = (X509TrustManager) tm;
+	    			        break;
+	    			    }
+	    			}
 
 	    			// Wrap it in your own class.
-//	    			final X509TrustManager finalDefaultTm = defaultTm;
-//	    			final X509TrustManager finalMyTm = myTm;
-//	    			X509TrustManager customTm = new X509TrustManager() {
-//	    			    @Override
-//	    			    public X509Certificate[] getAcceptedIssuers() {
-//	    			        // If you're planning to use client-cert auth,
-//	    			        // merge results from "defaultTm" and "myTm".
-//	    			        return finalDefaultTm.getAcceptedIssuers();
-//	    			    }
+	    			final X509TrustManager finalDefaultTm = defaultTm;
+	    			final X509TrustManager finalMyTm = myTm;
+	    			X509TrustManager customTm = new X509TrustManager() {
+	    			    @Override
+	    			    public X509Certificate[] getAcceptedIssuers() {
+	    			        // If you're planning to use client-cert auth,
+	    			        // merge results from "defaultTm" and "myTm".
+	    			        return finalDefaultTm.getAcceptedIssuers();
+	    			    }
 
-//	    			    @Override
-//	    			    public void checkServerTrusted(X509Certificate[] chain,
-//	    			            String authType) throws CertificateException {
-//	    			        try {
-//	    			            finalMyTm.checkServerTrusted(chain, authType);
-//	    			        } catch (CertificateException e) {
-//	    			            // This will throw another CertificateException if this fails too.
-//	    			            finalDefaultTm.checkServerTrusted(chain, authType);
-//	    			        }
-//	    			    }
+	    			    @Override
+	    			    public void checkServerTrusted(X509Certificate[] chain,
+	    			            String authType) throws CertificateException {
+	    			        try {
+	    			            finalMyTm.checkServerTrusted(chain, authType);
+	    			        } catch (CertificateException e) {
+	    			            // This will throw another CertificateException if this fails too.
+	    			            finalDefaultTm.checkServerTrusted(chain, authType);
+	    			        }
+	    			    }
 
-//	    			    @Override
-//	    			    public void checkClientTrusted(X509Certificate[] chain,
-//	    			            String authType) throws CertificateException {
-//	    			        // If you're planning to use client-cert auth,
-//	    			        // do the same as checking the server.
-//	    			        finalDefaultTm.checkClientTrusted(chain, authType);
-//	    			    }
-//	    			};
-
-//
-//	    			SSLContext sslContext = SSLContext.getInstance("SSL");
-//	    			sslContext.init(null, new TrustManager[] { customTm }, null);
-
-	    			// You don't have to set this as the default context,
-	    			// it depends on the library you're using.
-////	    			SSLContext.setDefault(sslContext);
-//	    			HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+	    			    @Override
+	    			    public void checkClientTrusted(X509Certificate[] chain,
+	    			            String authType) throws CertificateException {
+	    			        // If you're planning to use client-cert auth,
+	    			        // do the same as checking the server.
+	    			        finalDefaultTm.checkClientTrusted(chain, authType);
+	    			    }
+	    			};
+	    			
+	    			SSLContext sslContext = SSLContext.getInstance("SSL");
+	    			sslContext.init(null, new TrustManager[] { customTm }, null);
+	    			HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
 	    		
-				
 			}
 			
             
