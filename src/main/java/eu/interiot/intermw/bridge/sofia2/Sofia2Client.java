@@ -59,9 +59,11 @@ public class Sofia2Client {
 	private final String STRING_TYPE = "string"; 
 	private String TOKEN;
 	private String sofiaUser, sofiaPassword;
-	private int msRefresh = 0; // TODO: Add to properties?
+	private int msSubscriptionRefresh;
+	private int msSessionRefresh;
 	Thread sessionRefresh;
 	private final Logger logger = LoggerFactory.getLogger(Sofia2Client.class);
+	private String trustStore;
 	
 	Sofia2Client(Properties properties, String baseUrl) throws Exception{
 		try {
@@ -69,17 +71,25 @@ public class Sofia2Client {
             sofiaPassword = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "password");
             TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
             url = baseUrl;
-            KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP", "activage"); // TODO: CREATE KP IN SOFIA2 PLATFORM
+            KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP");
             deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
             identifierType = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier-type", STRING_TYPE);
+            trustStore = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "certificate"); // For self-signed certificates
+            msSubscriptionRefresh = Integer.valueOf(properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "subscription-refresh", "0")); // Subscription refresh parameter
+            msSessionRefresh = Integer.valueOf(properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "session-refresh", "600000"));
+            
             sessionKey = null;
+            
+            if(KP == null){
+            	throw new Exception("Error in bridge configuration: no KP");
+            }
             
             sessionRefresh = new Thread(){
 				public void run(){
 					
 					while(!this.isInterrupted()){
 						 try {
-							Thread.sleep(600000);
+							Thread.sleep(msSessionRefresh);
 							join();
 						} catch (InterruptedException e) {
 							Thread.currentThread().interrupt();
@@ -91,7 +101,7 @@ public class Sofia2Client {
 				}
 			};
             
-			if(url.startsWith("https")){
+			if(url.startsWith("https") && trustStore != null){
 				 // THIS IS A HACK TO AVOID PROBLEMS WITH SSL CERTIFICATE HOSTNAME VERIFICATION
 //	    		javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
 //	    			    new javax.net.ssl.HostnameVerifier(){
@@ -122,7 +132,7 @@ public class Sofia2Client {
 	    			    }
 	    			}
 
-	    			FileInputStream myKeys = new FileInputStream("/etc/inter-iot/intermw/sofia2TrustStore.jks");
+	    			FileInputStream myKeys = new FileInputStream(trustStore);
 
 	    			// Custom trust store
 	    			KeyStore myTrustStore = KeyStore.getInstance("JKS");
@@ -413,7 +423,7 @@ public class Sofia2Client {
 		else query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = " + fieldValue;  // numeric identifier
 		
 		String params = "?$sessionKey=" + sessionKey;
-		params = params + "&$msRefresh=" + msRefresh;
+		params = params + "&$msRefresh=" + msSubscriptionRefresh;
 		params = params + "&$ontology=" + ontName;
 		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); // TODO: CHECK IF THIS WORKS ON THE SERVER
 //		params = params + "&$query=" + query; // THIS SHOULD WORK ON THE SERVER

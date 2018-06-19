@@ -128,7 +128,6 @@ public class Sofia2Bridge extends AbstractBridge {
 
 	@Override
 	public Message subscribe(Message message) throws Exception {
-		// TODO: USE SOFIA2 TRANSLATOR TO GENERATE SUBSCRIBE QUERY FOR SOFIA2 (?)
 		Message responseMessage = createResponseMessage(message);
 		SubscribeReq subsreq = new SubscribeReq(message);
 		String conversationId = message.getMetadata().getConversationId().orElse(null);
