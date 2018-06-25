@@ -19,6 +19,7 @@
 package eu.interiot.intermw.bridge.sofia2;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -105,6 +106,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message unregisterPlatform(Message message) throws Exception {
 		// SSAP LEAVE
+		// TODO: CLEANUP (SHOULD REMOVE ALL ACTIVE SUBSCRIPTIONS?)
 		Message responseMessage = createResponseMessage(message);
 		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform);
         if (entityIDs.size() != 1) {
@@ -277,6 +279,11 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message listDevices(Message message) throws Exception {
+		/*
+		 * TODO:
+		 * The information should then be sent in a series of DEVICE_ADD_OR_UPDATE messages, with information about one device per message. 
+		 * 
+		 * */
 		Message responseMessage = createResponseMessage(message);
 		try{
 			// Discover all the registered devices
@@ -361,9 +368,26 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message observe(Message message) throws Exception {
-		// TODO
-		// TRANSLATE MESSAGE PAYLOAD TO FORMAT X AND SEND TO PLATFORM
-		return null;
+		// TRANSLATE MESSAGE PAYLOAD TO FORMAT X AND SEND IT TO PLATFORM
+		Message responseMessage = createResponseMessage(message);
+		try{
+			logger.debug("Sending observation to the platform {}...", platform.getPlatformId());
+			Sofia2Translator translator = new Sofia2Translator();
+			String body = translator.toFormatX(message.getPayload().getJenaModel());
+			// Get ontology and data for update
+			String ontName = Sofia2Utils.getOntName(body);
+		    String data = Sofia2Utils.getUpdateData(body);
+		    
+		    logger.debug("SOFIA2 ontology: " + ontName);
+		    logger.debug("Observation data: " + data);
+		    
+		    client.update(ontName, data); // Needs object ID
+			
+		}catch(Exception ex){
+			logger.error("Error in observe: " + ex.getMessage());
+			throw ex;
+		}
+		return responseMessage;
 	}
 	
 	@Override

@@ -1,6 +1,9 @@
 package eu.interiot.intermw.bridge.sofia2;
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +16,11 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import eu.interiot.intermw.commons.model.Platform;
 import eu.interiot.message.Message;
@@ -122,5 +130,34 @@ public class Sofia2Utils {
     	
 		return filteredString;
 	}
+    
+    public static String getOntName(String data){
+    	String ontName;
+    	JsonParser parser = new JsonParser();
+    	JsonObject dataObject = parser.parse(data).getAsJsonObject();
+    	Iterator<Entry<String, JsonElement>> it = dataObject.entrySet().iterator();
+    	do{
+    		Map.Entry<String, JsonElement> instanceAttr = it.next();
+    		ontName = instanceAttr.getKey();
+    	}while(it.hasNext() && (ontName.equals("contextData") || ontName.equals("_id")));
+    	
+    	return ontName;
+    }
+    
+    public static String getUpdateData(String observation){
+    	JsonObject data;
+    	JsonParser parser = new JsonParser();
+	    JsonObject inputData = parser.parse(observation).getAsJsonObject();
+    	if(inputData.has("body")){
+//	    	inputData.remove("messageType");
+//	    	inputData.addProperty("messageType", "UPDATE");
+//	    	inputData.remove("direction");
+//	    	inputData.addProperty("direction", "REQUEST");
+	    	data = inputData.get("body").getAsJsonObject();
+	    	data = data.remove("@type").getAsJsonObject();
+	    }else data = inputData;
+//	    data = data.remove("contextData").getAsJsonObject(); // Just in case
+    	return data.toString();
+    }
     
 }

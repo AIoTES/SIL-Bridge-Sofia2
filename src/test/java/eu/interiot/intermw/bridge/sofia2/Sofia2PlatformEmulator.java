@@ -88,6 +88,31 @@ public class Sofia2PlatformEmulator {
             return platformResponse;
         });
         
+        spark.put("sib/services/api_ssap/v01/SSAPResource/", (request, response) -> {
+            logger.debug("Received a UPDATE request.");
+            SsapInput input;
+            try {
+                input = objectMapper.readValue(request.body(), SsapInput.class);
+                System.out.println("HTTP PUT received");
+                System.out.println("***** BODY ****");
+                System.out.println(request.body());
+                System.out.println("*********");
+            } catch (Exception e) {
+                response.status(400);
+                return e.getMessage();
+            }
+            
+            String platformResponse="";
+            
+            logger.debug("UPDATE request.");
+            URL url1 = Resources.getResource("observations/response-insert.json");
+           	String platformResponseTemplate = Resources.toString(url1, Charsets.UTF_8);
+           	platformResponse = platformResponseTemplate.replace("%ONTOLOGY%", input.ontology); 	
+            
+            response.header("Content-Type", "application/json;charset=UTF-8");
+            response.status(200);
+            return platformResponse;
+        });
         
         spark.get("sib/services/api_ssap/v01/SSAPResource", (request, response) -> {
             logger.debug("Received QUERY request.");

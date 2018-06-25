@@ -79,6 +79,10 @@ public class Sofia2BridgeTest {
         String thingUnsubscribeJson = Resources.toString(url4, Charsets.UTF_8);
         Message thingUnsubscribeMsg = new Message(thingUnsubscribeJson);
 
+        URL url5 = Resources.getResource("messages/observe.json");
+        String observeJson = Resources.toString(url5, Charsets.UTF_8);
+        Message observeMsg = new Message(observeJson);
+        
         // create Platform object using platform-register message
         EntityID platformId = platformRegisterMsg.getMetadata().asPlatformMessageMetadata().getReceivingPlatformIDs().iterator().next();
 //        Platform platform = new Platform(platformId.toString(), platformRegisterMsg.getPayload());
@@ -132,11 +136,18 @@ public class Sofia2BridgeTest {
 
         if (observationMsg != null) {
             messageTypesEnumSet = observationMsg.getMetadata().getMessageTypes();
-            assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
+//            assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
             assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.OBSERVATION));
         } else {
             fail("Timeout waiting for observation messages.");
         }
+        
+        // observe
+        sofiaBridge.process(observeMsg);
+        responseMsg = publisher.retrieveMessage();
+        messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
+        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
+        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.OBSERVATION));
         
         // unsubscribe
         sofiaBridge.process(thingUnsubscribeMsg);

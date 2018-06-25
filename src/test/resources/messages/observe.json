@@ -1,0 +1,63 @@
+{
+   "@graph" : [ {
+     "@graph" : [ {
+       "@id" : "InterIoTMsg:meta/ec74ace6-19bf-428e-a382-46c93a54d387",
+       "@type" : [ "InterIoTMsg:Observation", "InterIoTMsg:meta" ],
+       "InterIoTMsg:ReceiverPlatformId" : {
+         "@id" : "InterIoT:example-platform1"
+       },
+       "InterIoTMsg:conversationID" : "conv1c67b42e-9b84-4424-8fd2-fb777ca1112d",
+       "InterIoTMsg:dateTimeStamp" : "2018-06-11T15:21:44.684Z",
+       "InterIoTMsg:messageID" : "msg6a68fd01-3dcb-4a0d-860f-67e29f0c2502"
+     } ],
+     "@id" : "InterIoTMsg:metadata"
+   }, {
+     "@graph" : [ {
+       "@id" : "_:b0",
+       "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+       "InterIoT:syntax/SOFIA2#hasName" : "hum",
+       "InterIoT:syntax/SOFIA2#hasValue" : {
+         "@type" : "http://www.w3.org/2001/XMLSchema#int",
+         "@value" : "1"
+       }
+     }, {
+       "@id" : "_:b1",
+       "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+       "InterIoT:syntax/SOFIA2#hasName" : "temp",
+       "InterIoT:syntax/SOFIA2#hasValue" : {
+         "@type" : "http://www.w3.org/2001/XMLSchema#float",
+         "@value" : "26.6"
+       }
+     }, {
+       "@id" : "_:b2",
+       "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+       "InterIoT:syntax/SOFIA2#hasName" : "id",
+       "InterIoT:syntax/SOFIA2#hasValue" : {
+         "@type" : "http://www.w3.org/2001/XMLSchema#int",
+         "@value" : "1"
+       }
+     }, {
+       "@id" : "_:b3",
+       "@type" : "InterIoT:syntax/SOFIA2#Instance",
+       "InterIoT:syntax/SOFIA2#hasAttribute" : [ {
+         "@id" : "_:b2"
+       }, {
+         "@id" : "_:b0"
+       }, {
+         "@id" : "_:b1"
+       } ],
+       "InterIoT:syntax/SOFIA2#hasId" : "5ad46394e4b0ffd95dce1277",
+       "InterIoT:syntax/SOFIA2#hasKp" : "AppSensorTemp",
+       "InterIoT:syntax/SOFIA2#hasKpInstance" : "Pruebas",
+       "InterIoT:syntax/SOFIA2#hasSessionKey" : "7b8a7e79-8003-4446-af97-78bc01a3c4c7",
+       "InterIoT:syntax/SOFIA2#hasTimestamp" : "2018-04-16T08:49:24.678Z",
+       "InterIoT:syntax/SOFIA2#hasType" : "SensorTermostato",
+       "InterIoT:syntax/SOFIA2#hasUser" : "sofia"
+     } ],
+     "@id" : "InterIoTMsg:payload"
+   } ],
+   "@context" : {
+     "InterIoTMsg" : "http://inter-iot.eu/message/",
+     "InterIoT" : "http://inter-iot.eu/"
+   }
+ }
