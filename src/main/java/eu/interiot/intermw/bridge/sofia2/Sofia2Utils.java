@@ -1,17 +1,16 @@
 package eu.interiot.intermw.bridge.sofia2;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.SimpleSelector;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +19,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import eu.interiot.intermw.commons.model.Platform;
+import eu.interiot.intermw.bridge.exceptions.BridgeException;
+import eu.interiot.intermw.commons.model.IoTDevice;
 import eu.interiot.message.Message;
 import eu.interiot.message.MessagePayload;
 import eu.interiot.message.ID.EntityID;
+import eu.interiot.message.ID.PropertyID;
+import eu.interiot.message.payload.types.IoTDevicePayload;
 import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
 
 
@@ -40,45 +42,52 @@ public class Sofia2Utils {
  //   public static final String EntityTypeDevice = Sofia2Translator.sofia2baseURI + "Instance";
     public static final String EntityTypeDevice = URIoldssn + "Device";
     public static final String EntityTypePlatform = URIsosa + "Platform"; // From class INTERMWDemoUtils
-
+    
 	
-	public static String getPlatformId(Platform platform){
-		return platform.getPlatformId();
-	}
-			  
-    public static Set<EntityID> getEntityIDsFromPayloadAsEntityIDSet(MessagePayload payload, String entityType) {
-        Model model = payload.getJenaModel();
-        return model.listStatements(new SimpleSelector(null, RDF.type, model.createResource(entityType))).toSet().stream().map(x -> new EntityID(x.getSubject().toString())).collect(Collectors.toSet());
-    }
-    
-    public static Set<EntityID> getEntityIdsAsEntityIDSet(Message message){
-		return getEntityIDsFromPayloadAsEntityIDSet(message.getPayload(), EntityTypeDevice);
-	}
-    
-    public static Set<String> getIdFromPayload(EntityID entityID, MessagePayload payload) {
-        Model payloadModel = payload.getJenaModel();
-        Set<String> names = new HashSet<>();
-        Property hasName = payloadModel.createProperty(propHasIdURI);
-        StmtIterator stmtIt = payloadModel.listStatements(new SimpleSelector(entityID.getJenaResource(), hasName, (RDFNode) null));
-        while (stmtIt.hasNext()) {
-            RDFNode node = stmtIt.next().getObject();
-            if (node.isLiteral()) {
-                names.add(node.asLiteral().getValue().toString());
-            } else {
-                names.add(node.toString());
-            }
+	static List<IoTDevice> extractDevices(Message message) {
+        IoTDevicePayload ioTDevicePayload = message.getPayloadAsGOIoTPPayload().asIoTDevicePayload();
+        Set<EntityID> deviceEntityIds = ioTDevicePayload.getIoTDevices();
+        List<IoTDevice> devices = new ArrayList<>();
+        for (EntityID deviceEntityId : deviceEntityIds) {
+            String deviceId = deviceEntityId.toString();
+            Optional<EntityID> hostedBy = ioTDevicePayload.getIsHostedBy(deviceEntityId);
+            Optional<EntityID> location = ioTDevicePayload.getHasLocation(deviceEntityId);
+            Optional<String> name = ioTDevicePayload.getHasName(deviceEntityId);
+
+            IoTDevice ioTDevice = new IoTDevice(deviceId);
+            ioTDevice.setHostedBy(hostedBy.isPresent() ? hostedBy.get().toString() : null);
+            ioTDevice.setLocation(location.isPresent() ? location.get().toString() : null);
+            ioTDevice.setName(name.orElse(null));
+            devices.add(ioTDevice);
         }
-        return names;
+        return devices;
+    }
+
+    static List<String> extractDeviceIds(Message message) {
+        IoTDevicePayload ioTDevicePayload = message.getPayloadAsGOIoTPPayload().asIoTDevicePayload();
+        Set<EntityID> deviceEntityIds = ioTDevicePayload.getIoTDevices();
+        List<String> deviceIds = new ArrayList<>();
+        for (EntityID deviceEntityId : deviceEntityIds) {
+            deviceIds.add(deviceEntityId.toString());
+        }
+        return deviceIds;
     }
     
-    public static Set<String> getPlatformIds(Message message){
-		Set<EntityID> entityIds = getEntityIDsFromPayloadAsEntityIDSet(message.getPayload(), EntityTypeDevice);
-		Set<String> deviceIds = new HashSet<>();
-		for (EntityID entityId : entityIds) {
-			deviceIds.addAll(getIdFromPayload(entityId, message.getPayload()));
-		}
-		return deviceIds;
-	}
+    static String extractConversationId(Message message) throws BridgeException {
+        IoTDevicePayload ioTDevicePayload = message.getPayloadAsGOIoTPPayload().asIoTDevicePayload();
+        Set<EntityID> deviceEntityIds = ioTDevicePayload.getIoTDevices();
+
+        if (deviceEntityIds.size() > 0) {
+            Set<String> propertyValues = ioTDevicePayload.getAllDataPropertyAssertionsForEntityAsStrings(
+                    deviceEntityIds.iterator().next(),
+                    new PropertyID("http://inter-iot.eu/conversationId"));
+            return propertyValues.iterator().next();
+
+        } else {
+            throw new BridgeException("Invalid UNSUBSCRIBE message: failed to extract conversationId");
+        }
+    }
+    
     
     public static Set<String> getEntityIDsFromPayload(MessagePayload payload, String entityType) {
         Model model = payload.getJenaModel();
@@ -103,8 +112,6 @@ public class Sofia2Utils {
         		filteredString[0] = splitId[splitId.length - 3];  // Ontology name
         		filteredString[1] = splitId[splitId.length - 2]; // Id name
         		filteredString[2] = splitId[splitId.length - 1]; // id value
-//        		filteredString = splitId[splitId.length - 1];
-//        		filteredString = filteredString.replace("#", "");
     		}else{
     			// http://inter-iot.eu/dev/{ontName}
     			String[] splitId = thingId.split("/");

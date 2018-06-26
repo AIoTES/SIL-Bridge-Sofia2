@@ -58,7 +58,6 @@ public class Sofia2BridgeTest {
         Configuration configuration = new DefaultConfiguration("*.bridge.properties");
 
         URL callbackUrl = new URL(configuration.getProperty("bridge.callback.url"));
-//        URL callbackUrl = new URL(configuration.getProperty("sofia2-callback-address"));
         int callbackPort = callbackUrl.getPort();
         Spark.port(callbackPort);
 
@@ -83,9 +82,12 @@ public class Sofia2BridgeTest {
         String observeJson = Resources.toString(url5, Charsets.UTF_8);
         Message observeMsg = new Message(observeJson);
         
+        URL url6 = Resources.getResource("messages/platform-unregister.json");
+        String platformUnregisterJson = Resources.toString(url6, Charsets.UTF_8);
+        Message platformUnregisterMsg = new Message(platformUnregisterJson);
+        
         // create Platform object using platform-register message
         EntityID platformId = platformRegisterMsg.getMetadata().asPlatformMessageMetadata().getReceivingPlatformIDs().iterator().next();
-//        Platform platform = new Platform(platformId.toString(), platformRegisterMsg.getPayload());
         Platform platform = new Platform();
         platform.setPlatformId(platformId.toString());
         // SHOULD GET THESE VALUES FROM THE MESSAGE (AND SOME OF THEM FROM PROPERTIES)
@@ -100,7 +102,6 @@ public class Sofia2BridgeTest {
         sofiaBridge.setPublisher(publisher);
 
         // register platform
-//        sofiaBridge.send(platformRegisterMsg);
         sofiaBridge.process(platformRegisterMsg);
         Message responseMsg = publisher.retrieveMessage();
         Set<MessageTypesEnum> messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
@@ -108,7 +109,6 @@ public class Sofia2BridgeTest {
         assertTrue(messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_REGISTER));
         
         // register thing
-//        sofiaBridge.send(thingRegisterMsg);
         sofiaBridge.process(thingRegisterMsg);
         Message responseMsg2 = publisher.retrieveMessage();
         Set<MessageTypesEnum> messageTypesEnumSet2 = responseMsg2.getMetadata().getMessageTypes();
@@ -116,7 +116,6 @@ public class Sofia2BridgeTest {
         assertTrue(messageTypesEnumSet2.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_CREATE_DEVICE));
 
         // subscribe to thing
-//        sofiaBridge.send(thingSubscribeMsg);
         sofiaBridge.process(thingSubscribeMsg);
         responseMsg = publisher.retrieveMessage();
         messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
@@ -155,5 +154,12 @@ public class Sofia2BridgeTest {
         messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.UNSUBSCRIBE));
+        
+        // Unregister Platform
+        sofiaBridge.process(platformUnregisterMsg);
+        responseMsg = publisher.retrieveMessage();
+        messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
+        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
+        assertTrue(messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_UNREGISTER));
     }
 }

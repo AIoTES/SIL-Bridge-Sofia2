@@ -27,9 +27,6 @@ import eu.interiot.intermw.commons.exceptions.MiddlewareException;
 import eu.interiot.intermw.commons.interfaces.Configuration;
 import eu.interiot.intermw.commons.model.IoTDevice;
 import eu.interiot.intermw.commons.model.Platform;
-import eu.interiot.intermw.commons.requests.PlatformCreateDeviceReq;
-import eu.interiot.intermw.commons.requests.SubscribeReq;
-import eu.interiot.intermw.commons.requests.UnsubscribeReq;
 import eu.interiot.message.ID.EntityID;
 import eu.interiot.message.Message;
 import eu.interiot.message.MessageMetadata;
@@ -106,11 +103,7 @@ public class Sofia2Bridge extends AbstractBridge {
 		// SSAP LEAVE
 		// TODO: CLEANUP (SHOULD REMOVE ALL ACTIVE SUBSCRIPTIONS?)
 		Message responseMessage = createResponseMessage(message);
-		Set<String> entityIDs = Sofia2Utils.getEntityIDsFromPayload(message.getPayload(), Sofia2Utils.EntityTypePlatform);
-        if (entityIDs.size() != 1) {
-            throw new BridgeException("Missing platform ID.");
-        }
-        String platformId = entityIDs.iterator().next();
+		String platformId = platform.getPlatformId();
         logger.debug("Unregistering platform {}...", platformId);
         try {
 			client.leave();
@@ -129,19 +122,21 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message subscribe(Message message) throws Exception {
 		Message responseMessage = createResponseMessage(message);
-		SubscribeReq subsreq = new SubscribeReq(message);
-		String conversationId = message.getMetadata().getConversationId().orElse(null);
+		logger.debug("subscribe() started.");
+		String conversationId = message.getMetadata().getConversationId().orElse(null); 
+		List<String> deviceIds = Sofia2Utils.extractDeviceIds(message);
+		
 		String endpoint = conversationId; // UNIQUE ENDPOINT
 		URL callbackUrl = new URL(bridgeCallbackUrl, endpoint);
 		List<String> subIds = new ArrayList<String>();
 		
-		if (subsreq.getDeviceIds().isEmpty()) {
+		if (deviceIds.isEmpty()) {	
           throw new PayloadException("No entities of type Device found in the Payload.");
 		}
 		// TODO: FIND A BETTER WAY TO DO THIS
 		try{
 			logger.debug("Subscribing to things using conversationId {}...", conversationId);
-			for (String deviceId : subsreq.getDeviceIds()) {
+			for (String deviceId : deviceIds) {
 				String thingId[] = Sofia2Utils.filterThingID(deviceId);
 				logger.debug("Sending Subscribe request to the platform for device {}...", deviceId);
 				System.out.println("Sending subscribe request to the platform for device {}... " + thingId[0] + "." + thingId[1] + ":" + thingId[2]);
@@ -165,7 +160,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	            PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
 	            metadata.initializeMetadata();
 	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.OBSERVATION);
-	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.RESPONSE);
+//	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.RESPONSE); // THIS OBSERVATION MESSAGE SHOULD NOT HAVE TYPE RESPONSE
 	            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
 	            metadata.setConversationId(conversationId);        
 	            
@@ -183,7 +178,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	    			JsonObject body = parser.parse(ssapObject.get("body").getAsString()).getAsJsonObject();
 		    		observation = body.get("data").getAsString();
 		    		System.out.println("Received data: " + observation);
-//		    		JsonArray array = parser.parse("[" + observation + "]").getAsJsonArray(); // SOFIA2 returns the new value and the last value
+//		    		JsonArray array = parser.parse("[" + observation + "]").getAsJsonArray(); // In case SOFIA2 returns more than one value
 //		    		observation = array.get(0).getAsJsonObject().toString(); // Get only the new value
 	    		}
 	    			    		
@@ -211,16 +206,14 @@ public class Sofia2Bridge extends AbstractBridge {
 		
 		return responseMessage;
 	}
-
 	
+
 	@Override
 	public Message unsubscribe(Message message) throws Exception {
 		Message responseMessage = createResponseMessage(message);
-		UnsubscribeReq req = new UnsubscribeReq(message);
-	    String conversationId = req.getConversationId();
+	    String conversationId = Sofia2Utils.extractConversationId(message);
 		
 		try{
-			
 			logger.info("Unsubscribing from things in conversation {}...", conversationId);
 			List<String> subId = subscriptionIds.get(conversationId); // RETRIEVE SUBSCRIPTION IDs
 			for (String subscriptionId : subId){
@@ -309,21 +302,16 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message platformCreateDevices(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR (?)
 		Message responseMessage = createResponseMessage(message);
-//		Sofia2Translator translator = new Sofia2Translator();
 		try{
-//			String body = translator.toFormatX(message.getPayload().getJenaModel());
-			
-			PlatformCreateDeviceReq req = new PlatformCreateDeviceReq(message);
+			List<IoTDevice> devices = Sofia2Utils.extractDevices(message);
 			// TODO: FIND A BETTER WAY TO DO THIS
-			for (IoTDevice iotDevice : req.getDevices()) {
+			for (IoTDevice iotDevice : devices) {
 				String thingId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
 	            logger.debug("Sending create-device (start-to-manage) request to the platform for device {}...", iotDevice.getDeviceId());
 	            System.out.println("Sending create-device (start-to-manage) request to the platform for device {}... " + thingId[0] + "." + thingId[1] + ":" + thingId[2]);
 	            client.register(thingId[0], thingId[1], thingId[2]); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
 	    		logger.debug("Success");  
 	        }
-			
-			
     	}catch(Exception e){
     		logger.error("Error registering devices: " + e.getMessage());
 			responseMessage.getMetadata().setStatus("KO");
@@ -428,5 +416,6 @@ public class Sofia2Bridge extends AbstractBridge {
 		responseMessage.getMetadata().setStatus("OK");
 		return responseMessage;
 	}
+	
 	
 }
