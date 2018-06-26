@@ -18,8 +18,6 @@
  */
 package eu.interiot.intermw.bridge.sofia2;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -392,9 +390,26 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message actuate(Message message) throws Exception {
-		// TODO
-		// TRANSLATE MESSAGE PAYLOAD TO FORMAT X AND SEND TO PLATFORM
-		return null;
+		// TRANSLATE MESSAGE PAYLOAD TO FORMAT X AND SEND IT TO PLATFORM
+		Message responseMessage = createResponseMessage(message);
+		try{
+			logger.debug("Sending actuation to the platform {}...", platform.getPlatformId());
+			Sofia2Translator translator = new Sofia2Translator();
+			String body = translator.toFormatX(message.getPayload().getJenaModel());
+			// Get ontology and data for update
+			String ontName = Sofia2Utils.getOntName(body);
+		    String data = Sofia2Utils.getUpdateData(body);
+		    
+		    logger.debug("SOFIA2 ontology: " + ontName);
+		    logger.debug("Actuation data: " + data);
+		    
+		    client.update(ontName, data); // Needs object ID
+			
+		}catch(Exception ex){
+			logger.error("Error in actuate: " + ex.getMessage());
+			throw ex;
+		}
+		return responseMessage;
 	}
 
 	@Override

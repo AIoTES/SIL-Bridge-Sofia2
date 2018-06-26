@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.SimpleSelector;
@@ -17,7 +16,6 @@ import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -33,13 +31,10 @@ import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
 public class Sofia2Utils {
 	
 	private final static Logger logger = LoggerFactory.getLogger(Sofia2Utils.class);
-
-  
 	public static final String URIsosa = "http://www.w3.org/ns/sosa/";
 	public static final String URIoldssn = "http://purl.oclc.org/NET/ssnx/ssn#";
 	public static final String propHasIdURI = Sofia2Translator.sofia2baseURI + "hasId";
-
-    
+	
 
     // Types
  //   public static final String EntityTypeDevice = Sofia2Translator.sofia2baseURI + "Instance";
@@ -156,7 +151,7 @@ public class Sofia2Utils {
 	    	data = inputData.get("body").getAsJsonObject();
 	    	data = data.remove("@type").getAsJsonObject();
 	    }else data = inputData;
-//	    data = data.remove("contextData").getAsJsonObject(); // Just in case
+	    data.remove("contextData").getAsJsonObject(); // Just in case
     	return data.toString();
     }
     
