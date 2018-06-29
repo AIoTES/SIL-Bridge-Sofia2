@@ -264,8 +264,12 @@ public class Sofia2Client {
 				response.append(inputLine);
 			}
 			in.close();
+			con.disconnect();
 			return response.toString();
-		}else return null;
+		}else{
+			con.disconnect();
+			return null;
+		}
 	}
 	
 	void getToken(String queryUrl, String user, String password) throws Exception{
@@ -398,14 +402,11 @@ public class Sofia2Client {
 			JsonObject device = new JsonObject();
 			device.add(ontName, deviceId);
 			String data = device.toString();
-//			throw new Exception("Thing does not exist");
 			insert(ontName, data);
 		}
 	}
 	
 	void insert(String ontName, String data) throws Exception{
-		// TODO: FORMAT DATA AS A JSON OBJECT
-		
 		String queryURL = url + "sib/services/api_ssap/v01/SSAPResource/";
 		JsonObject ssapResource = new JsonObject();
 		ssapResource.addProperty("sessionKey", sessionKey);
@@ -463,7 +464,6 @@ public class Sofia2Client {
 	
 		
 	void update(String ontName, String data) throws Exception{
-		// TODO: FORMAT DATA AS A JSON OBJECT
 		String queryURL = url + "sib/services/api_ssap/v01/SSAPResource/";
 		JsonObject ssapResource = new JsonObject();
 		ssapResource.addProperty("sessionKey", sessionKey);
@@ -476,7 +476,6 @@ public class Sofia2Client {
 	
 	
 	void delete(String ontName, String fieldName, String fieldValue) throws Exception{
-				
 		String data = query(ontName, fieldName, fieldValue);
 		if (data.equals("[ ]")){
 			throw new Exception("Thing does not exist");
@@ -497,6 +496,7 @@ public class Sofia2Client {
 //		ssapResource.addProperty("data", thing.toString());
 		
 		invoke(queryURL, "DELETE", ssapResource);
+		
 	}
 	
 	

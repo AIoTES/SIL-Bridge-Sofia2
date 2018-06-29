@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 @eu.interiot.intermw.bridge.annotations.Bridge(platformType = "http://inter-iot.eu/sofia2")
 public class Sofia2Bridge extends AbstractBridge {
@@ -246,10 +245,9 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message query(Message message) throws Exception {
 		Message responseMessage = createResponseMessage(message);
 		try{
-			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
-			for(String deviceId : deviceIds){
-				String thingId[] = Sofia2Utils.filterThingID(deviceId);
-//				String responseBody = client.query(thingId);
+			List<IoTDevice> devices = Sofia2Utils.extractDevices(message);
+			for (IoTDevice iotDevice : devices) {
+				String thingId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
 				String responseBody = client.query(thingId[0], thingId[1], thingId[2]);
 				Sofia2Translator translator = new Sofia2Translator();
 				// Create the model from the response JSON
@@ -332,7 +330,6 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message platformCreateDevices(Message message) throws Exception {
-		// TODO: USE SOFIA2 TRANSLATOR (?)
 		/*
 		 * Creates virtual sensors on the platform
 		 * Only the device id should be mandatory in the corresponding SOFIA2 ontologies
@@ -361,22 +358,21 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message platformUpdateDevices(Message message) throws Exception {
-		// TODO
-		// USE SOFIA2 TRANSLATOR TO GENERATE UPDATE MESSAGE DATA
+		// TODO: UPDATE VIRTUAL DEVICES
 		return null;
 	}
 	
 	@Override
 	public Message platformDeleteDevices(Message message) throws Exception {
-		// TODO: CHECK DEVICE ID
+		// DELETE VIRTUAL DEVICES
 		Message responseMessage = createResponseMessage(message);
 		try {
 			logger.debug("Removing devices...");
-			Set<String> deviceIds = Sofia2Utils.getEntityIds(message);
-			for(String deviceId : deviceIds){
-				String[] transformedId = Sofia2Utils.filterThingID(deviceId);
+			List<IoTDevice> devices = Sofia2Utils.extractDevices(message);
+			for (IoTDevice iotDevice : devices) {
+				String transformedId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
 				client.delete(transformedId[0], transformedId[1], transformedId[2]);
-				logger.debug("Device {} has been removed.", deviceId);
+				logger.debug("Device {} has been removed.", iotDevice.getDeviceId());
 			}
 			responseMessage.getMetadata().setStatus("OK");
 		} 
