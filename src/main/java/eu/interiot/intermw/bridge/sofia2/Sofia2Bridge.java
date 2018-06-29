@@ -20,6 +20,7 @@ package eu.interiot.intermw.bridge.sofia2;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonArray;
 
 import eu.interiot.intermw.bridge.abstracts.AbstractBridge;
 import eu.interiot.intermw.bridge.exceptions.BridgeException;
@@ -35,6 +36,7 @@ import eu.interiot.message.managers.URI.URIManagerMessageMetadata;
 import eu.interiot.message.exceptions.payload.PayloadException;
 import eu.interiot.message.metadata.PlatformMessageMetadata;
 import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
+
 
 import org.apache.jena.rdf.model.Model;
 import org.slf4j.Logger;
@@ -101,7 +103,10 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message unregisterPlatform(Message message) throws Exception {
 		// SSAP LEAVE
-		// TODO: CLEANUP (SHOULD REMOVE ALL ACTIVE SUBSCRIPTIONS?)
+		/* TODO: CLEANUP
+		* SHOULD REMOVE ALL ACTIVE SUBSCRIPTIONS?
+		* Remove devices from the registry: send DEVICE_REGISTRY_INITIALIZE message upstream
+		*/ 
 		Message responseMessage = createResponseMessage(message);
 		String platformId = platform.getPlatformId();
         logger.debug("Unregistering platform {}...", platformId);
@@ -273,11 +278,13 @@ public class Sofia2Bridge extends AbstractBridge {
 		/*
 		 * TODO:
 		 * The information should then be sent in a series of DEVICE_ADD_OR_UPDATE messages, with information about one device per message. 
+		 * Afterwards, the bridge should keep it updated with messages of type DEVICE_ADD_OR_UPDATE, DEVICE_REMOVE, or DEVICE_REGISTRY_INITIALIZE.
 		 * 
 		 * */
 		Message responseMessage = createResponseMessage(message);
 		try{
 			// Discover all the registered devices
+			logger.debug("ListDevices started...");
 			String responseBody = client.list();
 			Sofia2Translator translator = new Sofia2Translator();
 			// Create the model from the response JSON
@@ -288,6 +295,31 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.setPayload(responsePayload);
 			// Set the OK status
 			responseMessage.getMetadata().setStatus("OK");
+			
+			/*
+			 * Add devices to the registry
+			 * */
+			String conversationId = message.getMetadata().getConversationId().orElse(null); 
+			JsonParser parser = new JsonParser();
+			JsonArray devices = parser.parse(responseBody).getAsJsonArray();
+			for(int i = 0; i < devices.size(); i++){
+				Message addDeviceMessage = new Message();
+				PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
+	            metadata.initializeMetadata();
+	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.DEVICE_ADD_OR_UPDATE);
+	            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
+	            metadata.setConversationId(conversationId); 
+	            // Create a new message payload with the information about the device
+	            Model deviceModel = translator.toJenaModel(devices.get(i).getAsString());
+	    		MessagePayload devicePayload = new MessagePayload(deviceModel);
+	            
+	            addDeviceMessage.setMetadata(metadata);
+	            addDeviceMessage.setPayload(devicePayload);
+	            
+	            publisher.publish(addDeviceMessage);
+	            logger.debug("Device_Add_Or_Update message has been published upstream.");
+			}
+			logger.debug(devices.size() + " new devices have been added to the registry");
 		}
 		catch (Exception e) {
 			logger.error("Error in query: " + e.getMessage());
@@ -301,6 +333,10 @@ public class Sofia2Bridge extends AbstractBridge {
 	@Override
 	public Message platformCreateDevices(Message message) throws Exception {
 		// TODO: USE SOFIA2 TRANSLATOR (?)
+		/*
+		 * Creates virtual sensors on the platform
+		 * Only the device id should be mandatory in the corresponding SOFIA2 ontologies
+		 * */
 		Message responseMessage = createResponseMessage(message);
 		try{
 			List<IoTDevice> devices = Sofia2Utils.extractDevices(message);
@@ -309,11 +345,12 @@ public class Sofia2Bridge extends AbstractBridge {
 				String thingId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
 	            logger.debug("Sending create-device (start-to-manage) request to the platform for device {}...", iotDevice.getDeviceId());
 	            System.out.println("Sending create-device (start-to-manage) request to the platform for device {}... " + thingId[0] + "." + thingId[1] + ":" + thingId[2]);
-	            client.register(thingId[0], thingId[1], thingId[2]); // TODO: CHANGE THIS TO BE ABLE TO ACTUALLY INSERT THE DEVICE DATA
+	            client.register(thingId[0], thingId[1], thingId[2]); // TODO: Include name as an attribute of the virtual device
 	    		logger.debug("Success");  
 	        }
     	}catch(Exception e){
     		logger.error("Error registering devices: " + e.getMessage());
+    		e.printStackTrace();
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);

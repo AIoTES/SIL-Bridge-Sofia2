@@ -250,21 +250,22 @@ public class Sofia2Client {
 		}catch(Exception ex){
 			throw ex;
 		}
-		 
 		
-		if (responseCode < 200 || responseCode > 299) {
+		if ((responseCode < 200 || responseCode > 299) && responseCode != 404) {
             throw new Exception("Unsuccessful server response: " + responseCode);
         }
 		
-		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		String inputLine;
-		StringBuffer response = new StringBuffer();
+		if(responseCode != 404){
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
 
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-		return response.toString();
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			return response.toString();
+		}else return null;
 	}
 	
 	void getToken(String queryUrl, String user, String password) throws Exception{
@@ -341,6 +342,7 @@ public class Sofia2Client {
 		
 		String queryUrl = url + "sib/services/api_ssap/v01/SSAPResource";
 		String query;
+		String data;
 		
 		if(identifierType.equals(STRING_TYPE)) query = "\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
 		else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
@@ -352,10 +354,11 @@ public class Sofia2Client {
 		logger.debug("Query: " + queryUrl + params);
 		String response = invokeGet(queryUrl + params);
 		logger.debug("Response: " + response);
-		JsonParser parser = new JsonParser();
-		JsonObject ssapObject = parser.parse(response.toString()).getAsJsonObject();
-		String data = ssapObject.get("data").getAsString();
-		// TODO: DO SOMETHING IF THE RESPONSE IS EMPTY
+		if (response != null){
+			JsonParser parser = new JsonParser();
+			JsonObject ssapObject = parser.parse(response.toString()).getAsJsonObject();
+			data = ssapObject.get("data").getAsString();
+		}else data ="[ ]"; // An empty SOFIA2 response. Should return null instead?
 		return data;		
 		
 	}
@@ -375,7 +378,7 @@ public class Sofia2Client {
 		JsonParser parser = new JsonParser();
 		JsonObject ssapObject = parser.parse(response.toString()).getAsJsonObject();
 		String data = ssapObject.get("data").getAsString();
-		// TODO: DO SOMETHING IF THE RESPONSE IS EMPTY
+		if(data == null) data ="[ ]"; // An empty SOFIA2 response. Should return null instead?
 		return data;		
 		
 	}
@@ -385,12 +388,18 @@ public class Sofia2Client {
 	}
 	
 	void register(String ontName, String fieldName, String thingId) throws Exception{
-		String data = query(ontName, fieldName, thingId);
-		if (data.equals("[ ]")){
-			// Entity does not exist. Call insert method
-			// TODO: CREATE JSON OBJECT THAT REPRESENTS THE THING IN SOFIA2 AND CALL INSERT METHOD
-			throw new Exception("Thing does not exist");
-//			insert(ontName, data);
+		String res = query(ontName, fieldName, thingId);
+		if (res.equals("[ ]")){
+			// Entity does not exist. Call insert method to create a virtual device
+			// Only id and name are provided by the input message
+			JsonObject deviceId = new JsonObject();
+			if(identifierType.equals(STRING_TYPE)) deviceId.addProperty(fieldName, thingId); 
+			else deviceId.addProperty(fieldName, Long.valueOf(thingId)); // Or use Float instead?
+			JsonObject device = new JsonObject();
+			device.add(ontName, deviceId);
+			String data = device.toString();
+//			throw new Exception("Thing does not exist");
+			insert(ontName, data);
 		}
 	}
 	

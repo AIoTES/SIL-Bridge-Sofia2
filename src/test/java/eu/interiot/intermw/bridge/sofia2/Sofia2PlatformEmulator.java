@@ -143,6 +143,7 @@ public class Sofia2PlatformEmulator {
            	 	platformResponse = Resources.toString(url1, Charsets.UTF_8);
            	 	response.header("Content-Type", "application/json;charset=UTF-8");
            	 	response.status(200);
+ //          	 response.status(404);
             }
             
             return platformResponse;
