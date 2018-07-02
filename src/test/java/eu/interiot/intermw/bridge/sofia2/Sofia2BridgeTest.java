@@ -86,6 +86,10 @@ public class Sofia2BridgeTest {
         String platformUnregisterJson = Resources.toString(url6, Charsets.UTF_8);
         Message platformUnregisterMsg = new Message(platformUnregisterJson);
         
+        URL url7 = Resources.getResource("messages/discovery.json");
+        String discoveryListJson = Resources.toString(url7, Charsets.UTF_8);
+        Message discoveryListMsg = new Message(discoveryListJson);
+        
         // create Platform object using platform-register message
         EntityID platformId = platformRegisterMsg.getMetadata().asPlatformMessageMetadata().getReceivingPlatformIDs().iterator().next();
         Platform platform = new Platform();
@@ -107,6 +111,19 @@ public class Sofia2BridgeTest {
         Set<MessageTypesEnum> messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
         assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
         assertTrue(messageTypesEnumSet.contains(URIManagerMessageMetadata.MessageTypesEnum.PLATFORM_REGISTER));
+        
+        // Discovery
+        sofiaBridge.process(discoveryListMsg);
+        // Get device_add messages
+        Message deviceAddMsg = publisher.retrieveMessage();
+        messageTypesEnumSet = deviceAddMsg.getMetadata().getMessageTypes();
+        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.DEVICE_ADD_OR_UPDATE));
+        // Get response message
+        responseMsg = publisher.retrieveMessage();
+        messageTypesEnumSet = responseMsg.getMetadata().getMessageTypes();
+        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.RESPONSE));
+        assertTrue(messageTypesEnumSet.contains(MessageTypesEnum.LIST_DEVICES));
+        
         
         // register thing
         sofiaBridge.process(thingRegisterMsg);

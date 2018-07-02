@@ -95,6 +95,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
         return responseMessage;
 	}
@@ -119,6 +121,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
         return responseMessage;
 	}
@@ -206,6 +210,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
 		
 		return responseMessage;
@@ -236,6 +242,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
 		
 		return responseMessage;
@@ -267,6 +275,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
 		return responseMessage;
 	}
@@ -308,7 +318,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
 	            metadata.setConversationId(conversationId); 
 	            // Create a new message payload with the information about the device
-	            Model deviceModel = translator.toJenaModel(devices.get(i).getAsString());
+	            Model deviceModel = translator.toJenaModel(devices.get(i).getAsJsonObject().toString());
 	    		MessagePayload devicePayload = new MessagePayload(deviceModel);
 	            
 	            addDeviceMessage.setMetadata(metadata);
@@ -321,9 +331,12 @@ public class Sofia2Bridge extends AbstractBridge {
 		}
 		catch (Exception e) {
 			logger.error("Error in query: " + e.getMessage());
+			e.printStackTrace();
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
 		return responseMessage;
 	}
@@ -351,6 +364,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
     	}
 		return responseMessage;
 	}
@@ -381,6 +396,8 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().setStatus("KO");
 			responseMessage.getMetadata().addMessageType(URIManagerMessageMetadata.MessageTypesEnum.ERROR);
 			responseMessage.getMetadata().asErrorMessageMetadata().setExceptionStackTrace(e);
+			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
+			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
 		return responseMessage;
 	}

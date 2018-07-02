@@ -7,11 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.SimpleSelector;
-import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +17,6 @@ import com.google.gson.JsonParser;
 import eu.interiot.intermw.bridge.exceptions.BridgeException;
 import eu.interiot.intermw.commons.model.IoTDevice;
 import eu.interiot.message.Message;
-import eu.interiot.message.MessagePayload;
 import eu.interiot.message.ID.EntityID;
 import eu.interiot.message.ID.PropertyID;
 import eu.interiot.message.payload.types.IoTDevicePayload;

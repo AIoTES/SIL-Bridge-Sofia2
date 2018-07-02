@@ -251,25 +251,20 @@ public class Sofia2Client {
 			throw ex;
 		}
 		
-		if ((responseCode < 200 || responseCode > 299) && responseCode != 404) {
+		if (responseCode < 200 || responseCode > 299) {
             throw new Exception("Unsuccessful server response: " + responseCode);
         }
 		
-		if(responseCode != 404){
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
-			}
-			in.close();
-			con.disconnect();
-			return response.toString();
-		}else{
-			con.disconnect();
-			return null;
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
 		}
+		in.close();
+		con.disconnect();
+		return response.toString();
+		
 	}
 	
 	void getToken(String queryUrl, String user, String password) throws Exception{
