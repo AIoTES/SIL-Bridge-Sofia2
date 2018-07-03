@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
+
+import eu.interiot.intermw.bridge.sofia2.Sofia2Utils;
 import eu.interiot.translators.syntax.IllegalSyntaxException;
 import eu.interiot.translators.syntax.SyntacticTranslator;
 import org.apache.jena.datatypes.RDFDatatype;
@@ -17,6 +19,7 @@ import org.apache.jena.vocabulary.RDF;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 
@@ -175,7 +178,24 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
             	// {"_id":{"$oid":"..."}}
                 objectResource.addProperty(RDF.type, instanceType);
                 JsonNode idNode = field.getValue();
-                objectResource.addProperty(hasId, idNode.get("$oid").asText());
+//                objectResource.addProperty(hasId, idNode.get("$oid").asText());
+                // CHANGE ID TO URI FORMAT
+                String id = idNode.get("$oid").asText();
+                Iterator<Entry<String, JsonNode>> it2 = objectNode.fields();
+                String ontName = null;
+                while(it2.hasNext()){
+                	Map.Entry<String, JsonNode> field2 = it2.next();
+                	JsonNode node = field2.getValue();
+                	if(node.isObject()) {
+                		if(!field2.getKey().equals("contextData") && !field2.getKey().equals("_id")){ 
+                			ontName =  field2.getKey();
+                			break;
+                		}
+                	}
+                }
+               if(ontName != null) objectResource.addProperty(hasId, Sofia2Utils.urlize(id, ontName));
+               else objectResource.addProperty(hasId, id);
+                
             } else if (field.getKey().equals("contextData")) {
                 if(field.getValue().has("session_key")) objectResource.addProperty(hasSessionKey, field.getValue().get("session_key").asText());
                 else if (field.getValue().has("sessionKey")) objectResource.addProperty(hasSessionKey, field.getValue().get("sessionKey").asText()); // Indication message
@@ -408,7 +428,8 @@ public class Sofia2Translator extends SyntacticTranslator<String> {
         if (nodeIterator.hasNext()) {
         	value = nodeIterator.next().toString();
             ObjectNode attributeNode = mapper.createObjectNode();
-            attributeNode.put("$oid", value);
+//            attributeNode.put("$oid", value);
+            attributeNode.put("$oid", Sofia2Utils.deurlize(value)); // Remove URI format
             entity.set("_id", attributeNode);
         }
         

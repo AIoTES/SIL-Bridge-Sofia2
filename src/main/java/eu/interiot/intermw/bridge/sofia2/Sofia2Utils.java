@@ -30,7 +30,7 @@ public class Sofia2Utils {
 	public static final String URIsosa = "http://www.w3.org/ns/sosa/";
 	public static final String URIoldssn = "http://purl.oclc.org/NET/ssnx/ssn#";
 	public static final String propHasIdURI = Sofia2Translator.sofia2baseURI + "hasId";
-	
+	public final static String INTERIOT_PREFIX = "http://wwww.inter-iot.eu/dev/"; // TODO: CHANGE PREFIX?
 
     // Types
  //   public static final String EntityTypeDevice = Sofia2Translator.sofia2baseURI + "Instance";
@@ -114,16 +114,15 @@ public class Sofia2Utils {
     		}
     		
 		}else{
+			filteredString = new String[1];
+			filteredString[0] = thingId;
 			if (thingId.contains("/")) {
-				filteredString = new String[1];
-				filteredString[0] = thingId.replace("/", "-");
+				filteredString[0] = filteredString[0].replace("/", "-");
 			}
 			if (thingId.contains("#")) {
-				filteredString = new String[1];
-				filteredString[0] = thingId.replace("#", "+");
+				filteredString[0] = filteredString[0].replace("#", "+");
 			}
 		}
-    	
 		return filteredString;
 	}
     
@@ -155,5 +154,19 @@ public class Sofia2Utils {
 	    data.remove("contextData").getAsJsonObject(); // Just in case
     	return data.toString();
     }
+    
+    
+    public static String deurlize(String id) {
+		String deurlizedId[] = filterThingID(id);
+		return deurlizedId[deurlizedId.length - 1];
+	}
+
+	
+
+	public static String urlize(String id, String type) {
+		String urlizedId = INTERIOT_PREFIX + type + "/_id#" + id;
+		return urlizedId;
+	}
+
     
 }

@@ -46,7 +46,7 @@
        }, {
          "@id" : "_:b1"
        } ],
-       "InterIoT:syntax/SOFIA2#hasId" : "5ad46394e4b0ffd95dce1277",
+       "InterIoT:syntax/SOFIA2#hasId" : "http://wwww.inter-iot.eu/dev/SensorTermostato/_id#5ad46394e4b0ffd95dce1277",
        "InterIoT:syntax/SOFIA2#hasKp" : "AppSensorTemp",
        "InterIoT:syntax/SOFIA2#hasKpInstance" : "Pruebas",
        "InterIoT:syntax/SOFIA2#hasSessionKey" : "7b8a7e79-8003-4446-af97-78bc01a3c4c7",
