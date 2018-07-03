@@ -102,22 +102,6 @@ public class Sofia2Client {
 			};
             
 			if(url.startsWith("https") && trustStore != null){
-				 // THIS IS A HACK TO AVOID PROBLEMS WITH SSL CERTIFICATE HOSTNAME VERIFICATION
-//	    		javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-//	    			    new javax.net.ssl.HostnameVerifier(){
-//	    			 
-//	    			        public boolean verify(String hostname,
-//	    			                javax.net.ssl.SSLSession sslSession) {
-//	    			            if (hostname.contains("sofia2.televes")) {
-//	    			                return true;
-//	    			            }
-//	    			            else if (hostname.equals("sofia2.com")){
-//	    			            	return true;
-//	    			            }
-//	    			            else return false;
-//	    			        }
-//	    			    });
-	    		
 	    		// TO AVOID PROBLEMS WITH SSL SELF-SIGNED CERTIFICATES
 	    		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 	    			// Using null here initialises the TMF with the default trust store.
@@ -337,19 +321,21 @@ public class Sofia2Client {
 	
 	
 	String query(String ontName, String fieldName, String fieldValue) throws Exception{
-		// TODO: ADD MORE QUERIES
-		
 		String queryUrl = url + "sib/services/api_ssap/v01/SSAPResource";
 		String query;
 		String data;
 		
-		if(identifierType.equals(STRING_TYPE)) query = "\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
-		else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
-		
 		String params = "?$sessionKey=" + sessionKey;
-		params = params + "&$ontology=" + ontName;
-		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); // TODO: CHECK IF THIS WORKS ON THE SERVER
+		if(fieldName.equals("_id")){
+			query = "db." + ontName + ".find({\"" + fieldName + "\":{\"$oid\":\"" + fieldValue + "\"}})"; // Query by unique id
+		}else{
+			if(identifierType.equals(STRING_TYPE)) query =  "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
+			else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
+			params = params + "&$ontology=" + ontName;
+		}
+		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); 
 		params = params + "&$queryType=NATIVE";
+		
 		logger.debug("Query: " + queryUrl + params);
 		String response = invokeGet(queryUrl + params);
 		logger.debug("Response: " + response);
@@ -416,25 +402,28 @@ public class Sofia2Client {
 		String query;
 		String subscriptionId = "";
 		String queryUrl = url + "sib/services/api_ssap/v01/SSAPResource/subscribe";
+		String queryType;
 		
-//		query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // NATIVE 
 		
-		// NATIVE 
-//		if(identifierType.equals(STRING_TYPE)) query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}";
-//		else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}";
-		
-		// SQLLIKE
-		if(identifierType.equals(STRING_TYPE)) query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = \"" + fieldValue + "\""; // string identifier
-		else query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = " + fieldValue;  // numeric identifier
-		
+		if(fieldName.equals("_id")){
+			query = "db." + ontName + ".find({\"" + fieldName + "\":{\"$oid\":\"" + fieldValue + "\"}})"; // Native query by unique id. Should use SQLLIKE query?
+			queryType="NATIVE";  // NATIVE
+		}else{
+			// NATIVE 
+//			if(identifierType.equals(STRING_TYPE)) query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}";
+//			else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}";
+//			queryType="NATIVE";  // NATIVE
+			// SQLLIKE
+			if(identifierType.equals(STRING_TYPE)) query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = \"" + fieldValue + "\""; // string identifier
+			else query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = " + fieldValue;  // numeric identifier
+			queryType="SQLLIKE"; //SQLLIKE
+		}
 		String params = "?$sessionKey=" + sessionKey;
 		params = params + "&$msRefresh=" + msSubscriptionRefresh;
 		params = params + "&$ontology=" + ontName;
-		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); // TODO: CHECK IF THIS WORKS ON THE SERVER
-//		params = params + "&$query=" + query; // THIS SHOULD WORK ON THE SERVER
-//		params = params + "&$queryType=NATIVE"; // NATIVE
-		params = params + "&$queryType=SQLLIKE"; //SQLLIKE
-		params = params + "&$endpoint=" + callback;
+		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8");
+		params = params + "&$queryType=" + queryType;
+		params = params + "&$endpoint=" + callback; // URLencode?
 		
 		logger.debug("Subscription query: " + queryUrl + params);
 		

@@ -136,7 +136,7 @@ public class Sofia2PlatformEmulator {
                 return e.getMessage();
             }
             
-            if(sessionKey == null || query == null || ontology == null){
+            if(sessionKey == null || query == null){
             	response.status(400);
             }else{ 	
            	 	URL url1 = Resources.getResource("observations/response-query.json");
@@ -164,6 +164,7 @@ public class Sofia2PlatformEmulator {
                 System.out.println("*********");
             } catch (Exception e) {
                 response.status(400);
+                e.printStackTrace();
                 return e.getMessage();
             }
             

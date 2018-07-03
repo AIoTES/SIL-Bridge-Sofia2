@@ -1,0 +1,33 @@
+{
+  "@graph" : [ {
+    "@graph" : [ {
+      "@id" : "InterIoTMsg:meta/70b5d0fc-699f-4915-9176-5960ed1d9b95",
+      "@type" : [ "InterIoTMsg:meta", "InterIoTMsg:Platform_create_Device" ],
+      "InterIoTMsg:ReceiverPlatformId" : {
+        "@id" : "InterIoT:example-platform1"
+      },
+      "InterIoTMsg:conversationID" : "conv1b30d712-c687-459a-88ee-21dbbeeb4266",
+      "InterIoTMsg:dateTimeStamp" : "2018-01-15T21:48:55.192+01:00",
+      "InterIoTMsg:messageID" : "msg936c3d51-3e55-4fa2-b816-dfcf108b562e",
+      "InterIoTMsg:status" : "myclient"
+    } ],
+    "@id" : "InterIoTMsg:metadata"
+  }, {
+    "@graph" : [ {
+      "@id" : "http://inter-iot.eu/dev/SensorTemperatura/_id#5ad46394e4b0ffd95dce1277",
+      "@type" : "InterIoT:GOIoTP#IoTDevice",
+      "InterIoT:GOIoTP#hasLocation" : {
+        "@id" : "http://test.inter-iot.eu/TestLocation"
+      },
+      "InterIoT:GOIoTP#hasName" : "termostato1",
+      "http://www.w3.org/ns/sosa/IsHostedBy" : {
+        "@id" : "InterIoT:example-platform1"
+      }
+    } ],
+    "@id" : "InterIoTMsg:payload"
+  } ],
+  "@context" : {
+    "InterIoTMsg" : "http://inter-iot.eu/message/",
+    "InterIoT" : "http://inter-iot.eu/"
+  }
+}
