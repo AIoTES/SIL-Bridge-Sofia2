@@ -151,7 +151,7 @@ public class Sofia2Utils {
 	    	data = inputData.get("body").getAsJsonObject();
 	    	data = data.remove("@type").getAsJsonObject();
 	    }else data = inputData;
-	    data.remove("contextData").getAsJsonObject(); // Just in case
+    	if(inputData.has("contextData")) data.remove("contextData").getAsJsonObject(); // Just in case
     	return data.toString();
     }
     

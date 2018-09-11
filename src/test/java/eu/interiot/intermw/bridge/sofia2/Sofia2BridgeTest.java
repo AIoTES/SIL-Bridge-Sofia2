@@ -78,7 +78,8 @@ public class Sofia2BridgeTest {
         String thingUnsubscribeJson = Resources.toString(url4, Charsets.UTF_8);
         Message thingUnsubscribeMsg = new Message(thingUnsubscribeJson);
 
-        URL url5 = Resources.getResource("messages/observe.json");
+//        URL url5 = Resources.getResource("messages/observe.json");
+        URL url5 = Resources.getResource("messages/observe-UniversAAL.json");
         String observeJson = Resources.toString(url5, Charsets.UTF_8);
         Message observeMsg = new Message(observeJson);
         

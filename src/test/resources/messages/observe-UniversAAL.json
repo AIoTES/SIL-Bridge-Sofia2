@@ -1,0 +1,107 @@
+{
+  "@graph" : [ {
+    "@graph" : [ {
+      "@id" : "InterIoT:message/meta/4900ab04-d98a-4ffc-8ae3-1af1c52c7dd1",
+      "@type" : [ "InterIoT:message/meta", "InterIoT:message/Observation"],
+      "InterIoT:message/ReceiverSenderPlatformId" : {
+        "@id" : "InterIoT:example-platform1"
+      },
+      "InterIoT:message/conversationID" : "convcf8e4444-2c04-41a9-ad02-c51c1d4ea986",
+      "InterIoT:message/dateTimeStamp" : "2018-07-30T15:33:51.459Z",
+      "InterIoT:message/messageID" : "msg1989e105-75ff-4060-8652-cbc25999527f"
+    } ],
+    "@id" : "InterIoT:message/metadata"
+  }, {
+    "@graph" : [ {
+      "@id" : "_:b0",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+      "InterIoT:syntax/SOFIA2#hasName" : "origen",
+      "InterIoT:syntax/SOFIA2#hasValue" : "tal"
+    }, {
+      "@id" : "_:b1",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+      "InterIoT:syntax/SOFIA2#hasName" : "fechaActividad",
+      "InterIoT:syntax/SOFIA2#hasValue" : {
+        "@type" : "http://www.w3.org/2001/XMLSchema#long",
+        "@value" : "1418143893015"
+      }
+    }, {
+      "@id" : "_:b2",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+      "InterIoT:syntax/SOFIA2#hasName" : "tipo",
+      "InterIoT:syntax/SOFIA2#hasValue" : "Peso"
+    }, {
+      "@id" : "_:b3",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+      "InterIoT:syntax/SOFIA2#hasName" : "idPaciente",
+      "InterIoT:syntax/SOFIA2#hasValue" : "1219278"
+    }, {
+      "@id" : "_:b4",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+      "InterIoT:syntax/SOFIA2#hasName" : "idDispositivo",
+      "InterIoT:syntax/SOFIA2#hasValue" : {
+        "@id" : "http://ontology.universAAL.org/InterIoT.owl#scale"
+      }
+    }, {
+      "@id" : "_:b5",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+      "InterIoT:syntax/SOFIA2#hasName" : "valor",
+      "InterIoT:syntax/SOFIA2#hasValue" : {
+        "@type" : "http://www.w3.org/2001/XMLSchema#float",
+        "@value" : "50.0"
+      }
+    }, {
+      "@id" : "_:b6",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute",
+      "InterIoT:syntax/SOFIA2#hasName" : "emisor",
+      "InterIoT:syntax/SOFIA2#hasValue" : "UUAL"
+    }, {
+      "@id" : "http://ontology.universAAL.org/Context.owl#controller",
+      "@type" : "http://ontology.universAAL.org/Context.owl#ContextProviderType"
+    }, {
+      "@id" : "http://ontology.universAAL.org/InterIoT.owl#scale",
+      "@type" : [ "http://ontology.universAAL.org/PersonalHealthDevice.owl#WeighingScale", "http://ontology.universaal.org/PhThing.owl#Device", "http://ontology.universaal.org/PhThing.owl#PhysicalThing" ],
+      "http://ontology.universAAL.org/Device.owl#hasValue" : {
+        "@id" : "http://ontology.universAAL.org/InterIoT.owl#weight"
+      }
+    }, {
+      "@id" : "http://ontology.universAAL.org/InterIoT.owl#scaleProvider",
+      "@type" : "http://ontology.universAAL.org/Context.owl#ContextProvider",
+      "http://ontology.universAAL.org/Context.owl#hasType" : {
+        "@id" : "http://ontology.universAAL.org/Context.owl#controller"
+      }
+    }, {
+      "@id" : "http://ontology.universAAL.org/InterIoT.owl#weight",
+      "@type" : "InterIoT:syntax/SOFIA2#Attribute"
+    }, {
+      "@id" : "urn:org.universAAL.middleware.context.rdf:ContextEvent#_:9e2aa729ac420ba3:182a",
+      "@type" : "InterIoT:syntax/SOFIA2#Instant",
+      "InterIoT:syntax/SOFIA2#hasAttribute" : [ {
+        "@id" : "_:b4"
+      }, {
+        "@id" : "_:b5"
+      }, {
+        "@id" : "_:b3"
+      }, {
+        "@id" : "_:b2"
+      }, {
+        "@id" : "_:b1"
+      }, {
+        "@id" : "_:b6"
+      }, {
+        "@id" : "_:b0"
+      } ],
+      "InterIoT:syntax/SOFIA2#hasId" : "9f30b0d1-c6a6-4c9f-891c-a1d90d56f2b9",
+      "InterIoT:syntax/SOFIA2#hasType" : "Biomedida"
+    } ],
+    "@id" : "InterIoT:message/payload"
+  } ],
+  "@context" : {
+    "iiotex" : "http://inter-iot.eu/GOIoTPex#",
+    "geosparql" : "http://www.opengis.net/ont/geosparql#",
+    "iiot" : "http://inter-iot.eu/GOIoTP#",
+    "InterIoT" : "http://inter-iot.eu/",
+    "ssn" : "http://www.w3.org/ns/ssn/",
+    "sosa" : "http://www.w3.org/ns/sosa/"
+  }
+}
