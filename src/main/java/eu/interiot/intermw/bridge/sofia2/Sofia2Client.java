@@ -410,13 +410,16 @@ public class Sofia2Client {
 			queryType="NATIVE";  // NATIVE
 		}else{
 			// NATIVE 
+			// Add sort({"contextData.timestamp":-1}).limit(1) to get the most recent value only
 //			if(identifierType.equals(STRING_TYPE)) query = "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}";
 //			else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}";
-//			queryType="NATIVE";  // NATIVE
+//			queryType="NATIVE";  
+			
 			// SQLLIKE
-			if(identifierType.equals(STRING_TYPE)) query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = \"" + fieldValue + "\""; // string identifier
-			else query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = " + fieldValue;  // numeric identifier
-			queryType="SQLLIKE"; //SQLLIKE
+			// Add "order by contextData.timestamp DESC limit 1" to get only the most recent value.
+			if(identifierType.equals(STRING_TYPE)) query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = \"" + fieldValue + "\" order by contextData.timestamp DESC limit 1"; // string identifier
+			else query = "select * from " + ontName + " where " + ontName + "." + fieldName + " = " + fieldValue + " order by contextData.timestamp DESC limit 1";  // numeric identifier
+			queryType="SQLLIKE"; 
 		}
 		String params = "?$sessionKey=" + sessionKey;
 		params = params + "&$msRefresh=" + msSubscriptionRefresh;
