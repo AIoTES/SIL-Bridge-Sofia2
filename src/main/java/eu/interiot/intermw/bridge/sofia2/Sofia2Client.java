@@ -50,7 +50,7 @@ import eu.interiot.intermw.bridge.exceptions.BridgeException;
 
 public class Sofia2Client {
 	private String url;
-	private String KpInstance =  "sofia2Bridge"; // TODO: add to bridge configuration (?)
+	private String KpInstance;
 	private String sessionKey;
 	private String KP;
 	private String deviceOntologyName;
@@ -64,6 +64,7 @@ public class Sofia2Client {
 	Thread sessionRefresh;
 	private final Logger logger = LoggerFactory.getLogger(Sofia2Client.class);
 	private String trustStore;
+	private String trustStorePass;
 	
 	Sofia2Client(Properties properties, String baseUrl) throws Exception{
 		try {
@@ -72,9 +73,11 @@ public class Sofia2Client {
             TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
             url = baseUrl;
             KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP");
+            KpInstance = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP-instance", "sofia2Bridge");
             deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
             identifierType = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier-type", STRING_TYPE);
             trustStore = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "certificate"); // For self-signed certificates
+            trustStorePass = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "certificate-password"); // For self-signed certificates
             msSubscriptionRefresh = Integer.valueOf(properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "subscription-refresh", "0")); // Subscription refresh parameter
             msSessionRefresh = Integer.valueOf(properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "session-refresh", "600000"));
             
@@ -120,7 +123,7 @@ public class Sofia2Client {
 
 	    			// Custom trust store
 	    			KeyStore myTrustStore = KeyStore.getInstance("JKS");
-	    			myTrustStore.load(myKeys, "activage".toCharArray());
+	    			myTrustStore.load(myKeys, trustStorePass.toCharArray());
 	    			myKeys.close();
 	    			tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 	    			tmf.init(myTrustStore);
@@ -338,7 +341,7 @@ public class Sofia2Client {
 		
 		logger.debug("Query: " + queryUrl + params);
 		String response = invokeGet(queryUrl + params);
-		logger.debug("Response: " + response);
+//		logger.debug("Response: " + response);
 		if (response != null){
 			JsonParser parser = new JsonParser();
 			JsonObject ssapObject = parser.parse(response.toString()).getAsJsonObject();
