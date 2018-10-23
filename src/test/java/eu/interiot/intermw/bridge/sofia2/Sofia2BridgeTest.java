@@ -20,8 +20,9 @@ package eu.interiot.intermw.bridge.sofia2;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+
+import eu.interiot.intermw.bridge.BridgeConfiguration;
 import eu.interiot.intermw.commons.DefaultConfiguration;
-import eu.interiot.intermw.commons.interfaces.Configuration;
 import eu.interiot.intermw.commons.model.Platform;
 import eu.interiot.message.ID.EntityID;
 import eu.interiot.message.Message;
@@ -55,12 +56,7 @@ public class Sofia2BridgeTest {
 
     @Test
     public void testBridge() throws Exception {
-        Configuration configuration = new DefaultConfiguration("*.bridge.properties");
-
-        URL callbackUrl = new URL(configuration.getProperty("bridge.callback.url"));
-        int callbackPort = callbackUrl.getPort();
-        Spark.port(callbackPort);
-
+        
         // create Message objects from serialized messages
         URL url1 = Resources.getResource("messages/platform-register.json");
         String platformRegisterJson = Resources.toString(url1, Charsets.UTF_8);
@@ -101,6 +97,13 @@ public class Sofia2BridgeTest {
         platform.setType("sofia2");
         platform.setBaseEndpoint(new URL("http://localhost:4569/"));
         platform.setLocation("http://test.inter-iot.eu/TestLocation");
+        
+//      Configuration configuration = new DefaultConfiguration("*.bridge.properties");
+        BridgeConfiguration configuration = new BridgeConfiguration("Sofia2Bridge.properties", platform.getPlatformId(), new DefaultConfiguration("intermw.properties"));
+        
+        URL callbackUrl = new URL(configuration.getProperty("bridge.callback.url"));
+        int callbackPort = callbackUrl.getPort();
+        Spark.port(callbackPort);
 
         Sofia2Bridge sofiaBridge = new Sofia2Bridge(configuration, platform);
         PublisherMock<Message> publisher = new PublisherMock<>();

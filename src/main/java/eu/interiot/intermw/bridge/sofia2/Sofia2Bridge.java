@@ -22,10 +22,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonArray;
 
+import eu.interiot.intermw.bridge.BridgeConfiguration;
 import eu.interiot.intermw.bridge.abstracts.AbstractBridge;
 import eu.interiot.intermw.bridge.exceptions.BridgeException;
 import eu.interiot.intermw.commons.exceptions.MiddlewareException;
-import eu.interiot.intermw.commons.interfaces.Configuration;
 import eu.interiot.intermw.commons.model.IoTDevice;
 import eu.interiot.intermw.commons.model.Platform;
 import eu.interiot.message.ID.EntityID;
@@ -53,14 +53,14 @@ import java.util.Properties;
 @eu.interiot.intermw.bridge.annotations.Bridge(platformType = "http://inter-iot.eu/sofia2")
 public class Sofia2Bridge extends AbstractBridge {
     private final Logger logger = LoggerFactory.getLogger(Sofia2Bridge.class);
-    final static String PROPERTIES_PREFIX = "sofia2-";
+//    final static String PROPERTIES_PREFIX = "sofia2-";
    
 //	private Map<String,String> subscriptionIds = new HashMap<String,String>();
 	private Map<String, List<String>> subscriptionIds = new HashMap<String,List<String>>();
     
     private Sofia2Client client;
 
-    public Sofia2Bridge(Configuration configuration, Platform platform) throws MiddlewareException {
+    public Sofia2Bridge(BridgeConfiguration configuration, Platform platform) throws MiddlewareException {
         super(configuration, platform);
         logger.debug("SOFIA2 bridge is initializing...");
         Properties properties = configuration.getProperties();
@@ -126,7 +126,13 @@ public class Sofia2Bridge extends AbstractBridge {
 		}
         return responseMessage;
 	}
-
+	
+	@Override
+	public Message updatePlatform(Message message) throws Exception {
+		// TODO Auto-generated method stub
+		return  createResponseMessage(message);
+	}
+	
 	@Override
 	public Message subscribe(Message message) throws Exception {
 		Message responseMessage = createResponseMessage(message);
@@ -466,6 +472,6 @@ public class Sofia2Bridge extends AbstractBridge {
 		responseMessage.getMetadata().setStatus("OK");
 		return responseMessage;
 	}
-	
+		
 	
 }

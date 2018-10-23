@@ -68,18 +68,18 @@ public class Sofia2Client {
 	
 	Sofia2Client(Properties properties, String baseUrl) throws Exception{
 		try {
-            sofiaUser = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "user"); // USER + PASSWORD OR TOKEN?
-            sofiaPassword = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "password");
-            TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
+            sofiaUser = properties.getProperty("user"); // USER + PASSWORD OR TOKEN?
+            sofiaPassword = properties.getProperty("password");
+            TOKEN = properties.getProperty("token");
             url = baseUrl;
-            KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP");
-            KpInstance = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP-instance", "sofia2Bridge");
-            deviceOntologyName = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-class");
-            identifierType = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "device-identifier-type", STRING_TYPE);
-            trustStore = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "certificate"); // For self-signed certificates
-            trustStorePass = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "certificate-password"); // For self-signed certificates
-            msSubscriptionRefresh = Integer.valueOf(properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "subscription-refresh", "0")); // Subscription refresh parameter
-            msSessionRefresh = Integer.valueOf(properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "session-refresh", "600000"));
+            KP = properties.getProperty("KP");
+            KpInstance = properties.getProperty("KP-instance", "sofia2Bridge");
+            deviceOntologyName = properties.getProperty("device-class");
+            identifierType = properties.getProperty("device-identifier-type", STRING_TYPE);
+            trustStore = properties.getProperty("certificate"); // For self-signed certificates
+            trustStorePass = properties.getProperty("certificate-password"); // For self-signed certificates
+            msSubscriptionRefresh = Integer.valueOf(properties.getProperty("subscription-refresh", "0")); // Subscription refresh parameter
+            msSessionRefresh = Integer.valueOf(properties.getProperty("session-refresh", "600000"));
             
             sessionKey = null;
             

@@ -67,9 +67,9 @@ public class Sofia2GalClient {
 //            sofiaPassword = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "password");
 //            TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
             url = baseUrl;
-            KP = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "KP");
-            trustStore = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "certificate"); // For self-signed certificates
-            trustStorePass = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "certificate-password"); // For self-signed certificates
+            KP = properties.getProperty("KP");
+            trustStore = properties.getProperty("certificate"); // For self-signed certificates
+            trustStorePass = properties.getProperty("certificate-password"); // For self-signed certificates
             
             if(KP == null){
             	throw new Exception("Error in bridge configuration: no KP");
