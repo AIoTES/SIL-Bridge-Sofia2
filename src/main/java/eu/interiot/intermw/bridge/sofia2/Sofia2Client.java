@@ -72,6 +72,7 @@ public class Sofia2Client {
             sofiaPassword = properties.getProperty("password");
             TOKEN = properties.getProperty("token");
             url = baseUrl;
+            if (!url.endsWith("/")) url = url + "/"; // Just in case
             KP = properties.getProperty("KP");
             KpInstance = properties.getProperty("KP-instance", "sofia2Bridge");
             deviceOntologyName = properties.getProperty("device-class");

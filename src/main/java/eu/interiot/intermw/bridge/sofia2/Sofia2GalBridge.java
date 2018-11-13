@@ -104,7 +104,7 @@ public class Sofia2GalBridge extends AbstractBridge {
 
 	@Override
 	public Message updatePlatform(Message message) throws Exception {
-		// TODO Auto-generated method stub
+		// TODO update base endpoint, user, password?
 		return  createResponseMessage(message);
 	}
 	

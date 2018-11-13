@@ -129,8 +129,12 @@ public class Sofia2Bridge extends AbstractBridge {
 	
 	@Override
 	public Message updatePlatform(Message message) throws Exception {
-		// TODO Auto-generated method stub
-		return  createResponseMessage(message);
+		// TODO: update base endpoint, user, password
+		// TODO: send join request if connection data has been uploaded
+		// Do anything else?
+		Message responseMessage = createResponseMessage(message);
+		logger.info("Updating platform {}...", platform.getPlatformId());
+		return  responseMessage;
 	}
 	
 	@Override
@@ -185,7 +189,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	    		String observation;
 	    		if (ssapObject.has("version") && ssapObject.get("version").getAsString().equals("LEGACY")){
 	    			JsonObject body = ssapObject.get("body").getAsJsonObject();
-	    			System.out.println("Received data: " + body.toString());
+//	    			System.out.println("Received data: " + body.toString());
 		    		observation = body.get("data").getAsString();
 		    		System.out.println("Received data: " + observation);
 	    		}else{

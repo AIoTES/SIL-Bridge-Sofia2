@@ -49,7 +49,7 @@ import apisofia2.OperacionesSofia;
 
 public class Sofia2GalClient {
 	private String url;
-	private String KP;
+//	private String KP;
 //	private String TOKEN;
 //	private String sofiaUser, sofiaPassword;
 //	private int msSubscriptionRefresh;
@@ -67,13 +67,13 @@ public class Sofia2GalClient {
 //            sofiaPassword = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "password");
 //            TOKEN = properties.getProperty(Sofia2Bridge.PROPERTIES_PREFIX + "token");
             url = baseUrl;
-            KP = properties.getProperty("KP");
+//            KP = properties.getProperty("KP");
             trustStore = properties.getProperty("certificate"); // For self-signed certificates
             trustStorePass = properties.getProperty("certificate-password"); // For self-signed certificates
             
-            if(KP == null){
-            	throw new Exception("Error in bridge configuration: no KP");
-            }
+//            if(KP == null){
+//            	throw new Exception("Error in bridge configuration: no KP");
+//            }
             
             
 			if(url.startsWith("https") && trustStore != null){
