@@ -333,8 +333,11 @@ public class Sofia2Client {
 		if(fieldName.equals("_id")){
 			query = "db." + ontName + ".find({\"" + fieldName + "\":{\"$oid\":\"" + fieldValue + "\"}})"; // Query by unique id
 		}else{
-			if(identifierType.equals(STRING_TYPE)) query =  "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
-			else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
+//			if(identifierType.equals(STRING_TYPE)) query =  "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
+//			else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
+			// Get only the most recent value
+			if(identifierType.equals(STRING_TYPE)) query =  "db." + ontName + ".find({\"" + fieldName + "\":\"" + fieldValue + "\"}).sort({\"contextData.timestamp\":-1}).limit(1)"; // String id
+			else query = "db." + ontName + ".find({\"" + fieldName + "\":" + fieldValue + "}).sort({\"contextData.timestamp\":-1}).limit(1)"; // Numeric id
 			params = params + "&$ontology=" + ontName;
 		}
 		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); 
@@ -361,7 +364,7 @@ public class Sofia2Client {
 		
 		String params = "?$sessionKey=" + sessionKey;
 		params = params + "&$ontology=" + ontName;
-		params = params + "&$query={\"" + ontName + ".find()\"}";
+		params = params + "&$query=db."+ ontName +".find()";
 		params = params + "&$queryType=NATIVE";
 		String response = invokeGet(queryUrl + params);
 		JsonParser parser = new JsonParser();

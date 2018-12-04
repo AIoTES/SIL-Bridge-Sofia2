@@ -264,17 +264,29 @@ public class Sofia2Bridge extends AbstractBridge {
 		Message responseMessage = createResponseMessage(message);
 		try{
 			List<IoTDevice> devices = Sofia2Utils.extractDevices(message);
-			for (IoTDevice iotDevice : devices) {
-				String thingId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
-				String responseBody = client.query(thingId[0], thingId[1], thingId[2]);
-				Sofia2Translator translator = new Sofia2Translator();
+	        if (devices.isEmpty()) {
+	        	// Return status or last measurement of each device
+	        	String responseBody = client.list();
+	        	Sofia2Translator translator = new Sofia2Translator();
 				// Create the model from the response JSON
 				Model translatedModel = translator.toJenaModel(responseBody);
 				// Create a new message payload for the response message
 				MessagePayload responsePayload = new MessagePayload(translatedModel);
 				// Attach the payload to the message
 				responseMessage.setPayload(responsePayload);
-			}
+	        }else{
+	        	for (IoTDevice iotDevice : devices) {
+	        		String thingId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
+	        		String responseBody = client.query(thingId[0], thingId[1], thingId[2]);
+	        		Sofia2Translator translator = new Sofia2Translator();
+	        		// Create the model from the response JSON
+	        		Model translatedModel = translator.toJenaModel(responseBody);
+	        		// Create a new message payload for the response message
+	        		MessagePayload responsePayload = new MessagePayload(translatedModel);
+	        		// Attach the payload to the message
+	        		responseMessage.setPayload(responsePayload);
+	        	}
+	        }
 			// Set the OK status
 			responseMessage.getMetadata().setStatus("OK");
 			// Publish the message to INTER-MW
@@ -305,12 +317,6 @@ public class Sofia2Bridge extends AbstractBridge {
 			logger.debug("ListDevices started...");
 			String responseBody = client.list();
 			Sofia2Translator translator = new Sofia2Translator();
-			// Create the model from the response JSON
-			Model translatedModel = translator.toJenaModel(responseBody);
-			// Create a new message payload for the response message
-			MessagePayload responsePayload = new MessagePayload(translatedModel);
-			// Attach the payload to the message
-			responseMessage.setPayload(responsePayload);
 			// Set the OK status
 			responseMessage.getMetadata().setStatus("OK");
 			
@@ -318,26 +324,28 @@ public class Sofia2Bridge extends AbstractBridge {
 			 * Add devices to the registry
 			 * */
 			String conversationId = message.getMetadata().getConversationId().orElse(null); 
-			JsonParser parser = new JsonParser();
-			JsonArray devices = parser.parse(responseBody).getAsJsonArray();
-			for(int i = 0; i < devices.size(); i++){
-				Message addDeviceMessage = new Message();
-				PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
-	            metadata.initializeMetadata();
-	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.DEVICE_ADD_OR_UPDATE);
-	            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
-	            metadata.setConversationId(conversationId); 
-	            // Create a new message payload with the information about the device
-	            Model deviceModel = translator.toJenaModel(devices.get(i).getAsJsonObject().toString());
-	    		MessagePayload devicePayload = new MessagePayload(deviceModel);
-	            
-	            addDeviceMessage.setMetadata(metadata);
-	            addDeviceMessage.setPayload(devicePayload);
-	            
-	            publisher.publish(addDeviceMessage);
-	            logger.debug("Device_Add_Or_Update message has been published upstream.");
-			}
-			logger.debug(devices.size() + " new devices have been added to the registry");
+			if(responseBody!=null){
+				JsonParser parser = new JsonParser();
+				JsonArray devices = parser.parse(responseBody).getAsJsonArray();
+				for(int i = 0; i < devices.size(); i++){
+					Message addDeviceMessage = new Message();
+					PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
+		            metadata.initializeMetadata();
+		            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.DEVICE_ADD_OR_UPDATE);
+		            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
+		            metadata.setConversationId(conversationId); 
+		            // Create a new message payload with the information about the device
+		            Model deviceModel = translator.toJenaModel(devices.get(i).getAsJsonObject().toString());
+		    		MessagePayload devicePayload = new MessagePayload(deviceModel);
+		            
+		            addDeviceMessage.setMetadata(metadata);
+		            addDeviceMessage.setPayload(devicePayload);
+		            
+		            publisher.publish(addDeviceMessage);
+		            logger.debug("Device_Add_Or_Update message has been published upstream.");
+				}
+				logger.debug(devices.size() + " new devices have been added to the registry");
+			}else logger.debug("0 new devices have been added to the registry");
 		}
 		catch (Exception e) {
 			logger.error("Error in query: " + e.getMessage());

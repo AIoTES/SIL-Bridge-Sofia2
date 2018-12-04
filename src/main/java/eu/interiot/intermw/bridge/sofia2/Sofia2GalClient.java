@@ -43,8 +43,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+//import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import apisofia2.OperacionesSofia;
 
 public class Sofia2GalClient {
@@ -53,8 +57,8 @@ public class Sofia2GalClient {
 //	private String TOKEN;
 //	private String sofiaUser, sofiaPassword;
 //	private int msSubscriptionRefresh;
-	Thread sessionRefresh;
-//	private final Logger logger = LoggerFactory.getLogger(Sofia2GalClient.class);
+//	Thread sessionRefresh;
+	private final Logger logger = LoggerFactory.getLogger(Sofia2GalClient.class);
 	private String trustStore;
 	private String trustStorePass;
 	private OperacionesSofia api;
@@ -162,30 +166,86 @@ public class Sofia2GalClient {
 	
 	
 	
-	String query(String ontName, String fieldName, String fieldValue) throws Exception{
-		// TODO: QUERY METHOD
-//		String queryUrl = url + "sib/services/api_ssap/v01/SSAPResource";
-//		String query;
-//		String data;	
-//		String params = "?$sessionKey=" + sessionKey;
-//		if(fieldName.equals("_id")){
-//			query = "db." + ontName + ".find({\"" + fieldName + "\":{\"$oid\":\"" + fieldValue + "\"}})"; // Query by unique id
-//		}else{
-//			if(identifierType.equals(STRING_TYPE)) query =  "{\"" + ontName + "." + fieldName + "\":\"" + fieldValue + "\"}"; // String id
-//			else query = "{\"" + ontName + "." + fieldName + "\":" + fieldValue + "}"; // Numeric id
-//			params = params + "&$ontology=" + ontName;
-//		}
-//		params = params + "&$query=" + URLEncoder.encode(query, "UTF-8"); 
-//		params = params + "&$queryType=NATIVE";		
-//		logger.debug("Query: " + queryUrl + params);
-//		String response = invokeGet(queryUrl + params);
-//		if (response != null){
-//			JsonParser parser = new JsonParser();
-//			JsonObject ssapObject = parser.parse(response.toString()).getAsJsonObject();
-//			data = ssapObject.get("data").getAsString();
-//		}else data ="[ ]"; // An empty SOFIA2 response. Should return null instead?
-//		return data;	
-		return "";
+	String query(String type, String device) throws Exception{
+		// TODO: TEST QUERY METHOD
+		    	
+    	int limit = 1;
+    	// TODO: SET INITIAL TIME FOR QUERY
+    	String time = "20180918000103";
+//    	SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
+//		f.setTimeZone(TimeZone.getTimeZone("UTC"));
+//    	Calendar calendar = Calendar.getInstance();
+//    	calendar.setTime(new java.util.Date());
+//    	calendar.add(Calendar.MINUTE, -3);
+//    	String time = f.format(calendar.getTime());
+    	String fechaActividad = "";
+    	String idPaciente = "";
+    	JSONObject data = null;
+		JSONObject indication = null;
+		JSONObject body = null;				
+							
+		JSONArray responses = new JSONArray();
+							
+		logger.debug("Tipo medida: "+ type);
+		logger.debug("Sensor: "+ device);
+		logger.debug("Time: " + time);
+					
+		if(type.equals("scale")){ 
+			responses.put(0, api.obtenerBiomedidas("concentrador", device, "", "PESO", time, limit)); // weight measurement
+		}else if(type.equals("bloodPressureMonitor")){
+			// Three measurements from the blood pressure monitor
+			responses.put(0, api.obtenerBiomedidas("concentrador", device, "", "TAS", time, limit)); // Systolic
+			responses.put(1, api.obtenerBiomedidas("concentrador", device, "", "TAD", time, limit)); // Diastolic
+			responses.put(2, api.obtenerBiomedidas("concentrador", device, "", "PPM", time, limit)); // Heart rate
+		}else if(type.equals("coagulometer")){
+			// Coagulometer
+			responses.put(0, api.obtenerBiomedidas("concentrador", device, "", "INR", time, limit)); // INR measurement
+		}else{
+			// ERROR
+			throw new Exception("Unrecognized device type: " + type);
+		}							
+									
+		// Send data to bridge class
+		for (int i=0; i<responses.length(); i++){
+			int rescode = responses.getJSONObject(i).getInt("codigo");
+			if (rescode == 0){			
+				JSONArray resultado = responses.getJSONObject(i).getJSONArray("resultado");
+						
+				logger.debug(resultado.toString());
+				logger.debug("Result length: " + resultado.length());
+					
+							
+				if(resultado.length()>0){										
+					JSONObject biomedida = resultado.getJSONObject(0);			
+							
+					fechaActividad = biomedida.getString("fechaActividad");
+					idPaciente = biomedida.getString("idPaciente");
+					String contextData = "{ \"session_key\" : \"7b8a7e79-8003-4446-af97-78bc01a3c4c7\" , \"user\" : \"activage\" , \"kp\" : \"ActivageKP\" , \"kp_instancia\" : \"Pruebas\" , \"timestamp\" : { \"$date\" : \""+ time +"\"}}";											
+					data = new JSONObject();
+					data.put("_id", new JSONObject("{ \"$oid\" : \"5ad46394e4b0ffd95dce1277\"}"));
+					data.put("contextData", new JSONObject(contextData));
+					data.put("Biomedida", biomedida);
+																								
+					indication = new JSONObject();
+					body = new JSONObject();
+					body.put("data", data.toString());
+					indication.put("body", body);
+					indication.put("version","LEGACY");
+							
+					logger.debug("Datos enviados" + indication.toString());							
+				}
+			}else{
+				// Error? Do something.
+				// Code 106 means no new data
+				if (rescode != 106){
+					logger.error("Could not get observations from the sensor. " + rescode);
+					logger.error(responses.getJSONObject(i).getString("descripcion"));
+				} 
+			}
+		}	
+		
+		if (indication != null) return indication.toString();	
+		else return "[ ]";
 	}
 	
 	
@@ -204,13 +264,13 @@ public class Sofia2GalClient {
 //		String data = ssapObject.get("data").getAsString();
 //		if(data == null) data ="[ ]"; // An empty SOFIA2 response. Should return null instead?
 //		return data;
-		return "";
+		return "[ ]";
 		
 	}
 	
 	String list() throws Exception{
 		// TODO: list all devices
-		return "";
+		return "[ ]";
 	}
 	
 			
@@ -220,18 +280,18 @@ public class Sofia2GalClient {
 		JSONObject medida = new JSONObject(data);
 		biomedidas.put(medida.get("Biomedida"));
 		
-		System.out.println("Enviando datos...");
-		System.out.println(biomedidas.toString());
-		System.out.println("**********************");
+		logger.debug("Enviando datos...");
+		logger.debug(biomedidas.toString());
+		logger.debug("**********************");
 		JSONArray responses = api.insertarBiomedidas(biomedidas);
 		
 		for (int i=0; i<responses.length(); i++){
 			int rescode = responses.getJSONObject(i).getInt("codigo");
 			if (rescode != 200 && rescode !=0){
 				// Error
-				System.err.println("Could not send observation to SOFIA2. " + rescode);
-				System.err.println(responses.getJSONObject(i).getString("descripcion"));
-			} else System.out.println(rescode);
+				logger.error("Could not send observation to SOFIA2. " + rescode);
+				logger.error(responses.getJSONObject(i).getString("descripcion"));
+			} else logger.info("Response code: " + rescode);
 		}
 		
 	}	
@@ -286,9 +346,9 @@ public class Sofia2GalClient {
 						String device = subscription.getDevice();
 						boolean nuevo = true;					
 							
-						System.out.println("Tipo medida: "+ type);
-						System.out.println("Sensor: "+ device);
-						System.out.println("Time: " + time);
+						logger.debug("Tipo medida: "+ type);
+						logger.debug("Sensor: "+ device);
+						logger.debug("Time: " + time);
 							
 						if(type.equals("scale")){ 
 							responses.put(0, api.obtenerBiomedidas("concentrador", device, "", "PESO", time, limit)); // weight measurement
@@ -297,8 +357,10 @@ public class Sofia2GalClient {
 							responses.put(0, api.obtenerBiomedidas("concentrador", device, "", "TAS", time, limit)); // Systolic
 							responses.put(1, api.obtenerBiomedidas("concentrador", device, "", "TAD", time, limit)); // Diastolic
 							responses.put(2, api.obtenerBiomedidas("concentrador", device, "", "PPM", time, limit)); // Heart rate
+						}else if(type.equals("coagulometer")){
+							// Coagulometer
+							responses.put(0, api.obtenerBiomedidas("concentrador", device, "", "INR", time, limit)); // INR measurement
 						}else{
-							// TODO: add coagulometer
 							// ERROR
 							throw new Exception("Unrecognized device type: " + type);
 						}							
@@ -310,8 +372,8 @@ public class Sofia2GalClient {
 							
 								JSONArray resultado = responses.getJSONObject(i).getJSONArray("resultado");
 								
-								System.out.println(resultado.toString());
-								System.out.println(resultado.length());
+								logger.debug(resultado.toString());
+								logger.debug("Result length: " + resultado.length());
 									
 								JSONObject data;
 								JSONObject indication;
@@ -340,9 +402,8 @@ public class Sofia2GalClient {
 										indication.put("body", body);
 										indication.put("version","LEGACY");
 											
-										System.out.println("Datos enviados");
-										System.out.println(indication.toString());
-										
+										logger.debug("Datos enviados: " + indication.toString());
+																				
 										// Send data to the listener
 										HttpPost httpPost = new HttpPost(subscription.callbackUrl);
 										HttpEntity httpEntity = new StringEntity(indication.toString(), ContentType.APPLICATION_JSON);
@@ -350,8 +411,7 @@ public class Sofia2GalClient {
 										HttpResponse httpResponse = httpClient.execute(httpPost);
 										// Do something with the response code?
 										if(httpResponse.getStatusLine().getStatusCode() == 200){
-					                    	System.out.println("Observation has been sent to the bridge:");
-					                    	System.out.println(indication);
+					                    	logger.debug("Observation has been sent to the bridge: " + indication);
 					                    }
 									}								
 									
@@ -360,8 +420,8 @@ public class Sofia2GalClient {
 								// Error? Do something.
 								// Code 106 means no new data
 								if (rescode != 106){
-									System.err.println("Could not get observations from the sensor. " + rescode);
-									System.err.println(responses.getJSONObject(i).getString("descripcion"));
+									logger.error("Could not get observations from the sensor. " + rescode);
+									logger.error(responses.getJSONObject(i).getString("descripcion"));
 								} 
 							}
 						}
