@@ -95,8 +95,6 @@ public class Sofia2Utils {
     
     public static String[] filterThingID(String thingId) {
     	String[] filteredString = null; //= thingId;
-
-		// TODO: CHECK IF THIS IS APPROPRIATE FOR SOFIA2
     	if (thingId.contains("http://")) {
     		if(thingId.contains("#")){
     			// ThingId http://inter-iot.eu/dev/{ontName}/{idName}#{id}

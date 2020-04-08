@@ -53,11 +53,7 @@ import java.util.Properties;
 @eu.interiot.intermw.bridge.annotations.Bridge(platformType = "http://inter-iot.eu/sofia2")
 public class Sofia2Bridge extends AbstractBridge {
     private final Logger logger = LoggerFactory.getLogger(Sofia2Bridge.class);
-//    final static String PROPERTIES_PREFIX = "sofia2-";
-   
-//	private Map<String,String> subscriptionIds = new HashMap<String,String>();
 	private Map<String, List<String>> subscriptionIds = new HashMap<String,List<String>>();
-    
     private Sofia2Client client;
 
     public Sofia2Bridge(BridgeConfiguration configuration, Platform platform) throws MiddlewareException {
@@ -65,7 +61,7 @@ public class Sofia2Bridge extends AbstractBridge {
         logger.debug("SOFIA2 bridge is initializing...");
         Properties properties = configuration.getProperties();
         
-        if (bridgeCallbackUrl == null) { // From the AbstractBridge class
+        if (bridgeCallbackUrl == null) {
             throw new BridgeException("Invalid SOFIA2 bridge configuration.");
         }
         
@@ -178,7 +174,7 @@ public class Sofia2Bridge extends AbstractBridge {
 	            PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
 	            metadata.initializeMetadata();
 	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.OBSERVATION);
-//	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.RESPONSE); // THIS OBSERVATION MESSAGE SHOULD NOT HAVE TYPE RESPONSE
+//	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.RESPONSE);
 	            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
 	            metadata.setConversationId(conversationId);        
 	            
