@@ -68,18 +68,12 @@ public class Sofia2Utils {
     }
     
     static String extractConversationId(Message message) throws BridgeException {
-        IoTDevicePayload ioTDevicePayload = message.getPayloadAsGOIoTPPayload().asIoTDevicePayload();
-        Set<EntityID> deviceEntityIds = ioTDevicePayload.getIoTDevices();
+    	String conversationId = message.getMetadata().asPlatformMessageMetadata().getSubscriptionId().get();
 
-        if (deviceEntityIds.size() > 0) {
-            Set<String> propertyValues = ioTDevicePayload.getAllDataPropertyAssertionsForEntityAsStrings(
-                    deviceEntityIds.iterator().next(),
-                    new PropertyID("http://inter-iot.eu/conversationId"));
-            return propertyValues.iterator().next();
-
-        } else {
+        if (conversationId==null || conversationId=="") {
             throw new BridgeException("Invalid UNSUBSCRIBE message: failed to extract conversationId");
         }
+        return conversationId;
     }
     
     

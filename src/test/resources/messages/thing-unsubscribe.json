@@ -1,27 +1,38 @@
 {
    "@graph" : [ {
      "@graph" : [ {
-       "@id" : "InterIoTMsg:meta/cf2c677f-d2af-4b23-aded-0dd8cf2ef152",
-       "@type" : [ "InterIoTMsg:Unsubscribe", "InterIoTMsg:meta" ],
-       "InterIoTMsg:ReceiverPlatformId" : {
+       "@id" : "msg:meta/5a9ba19c-2548-4957-bb8e-bfe366ebc5ee",
+       "msg:ReceiverPlatformId" : {
          "@id" : "InterIoT:example-platform1"
        },
-       "InterIoTMsg:clientID" : "myclient",
-       "InterIoTMsg:conversationID" : "conv614d3621-7399-45b1-bf2f-505b24045ea6",
-       "InterIoTMsg:dateTimeStamp" : "2018-06-11T15:24:17.151Z",
-       "InterIoTMsg:messageID" : "msg1bd8e5ca-4c35-4c05-888c-1b19e6e9d042"
+       "msg:clientID" : "myclient",
+       "msg:conversationID" : "conv614d3621-7399-45b1-bf2f-505b24045ea6",
+       "msg:dateTimeStamp" : "2020-07-06T11:27:29.640Z",
+       "msg:messageID" : "msga0a0bd72-b320-4926-9e80-5edd934b2d20",
+       "msg:subscriptionID" : "conv614d3621-7399-45b1-bf2f-505b24045ea6",
+       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : [ {
+         "@id" : "msg:Unsubscribe"
+       }, {
+         "@id" : "msg:meta"
+       } ]
      } ],
-     "@id" : "InterIoTMsg:metadata"
+     "@id" : "msg:metadata"
    }, {
      "@graph" : [ {
        "@id" : "http://inter-iot.eu/dev/SensorTemperatura/identificador#example-sensor",
-       "@type" : "InterIoT:GOIoTP#IoTDevice",
-       "InterIoT:conversationId" : "conv614d3621-7399-45b1-bf2f-505b24045ea6"
+       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : {
+         "@id" : "iiot:IoTDevice"
+       }
      } ],
-     "@id" : "InterIoTMsg:payload"
+     "@id" : "msg:payload"
    } ],
    "@context" : {
-     "InterIoTMsg" : "http://inter-iot.eu/message/",
-     "InterIoT" : "http://inter-iot.eu/"
+     "msg" : "http://inter-iot.eu/message/",
+     "iiotex" : "http://inter-iot.eu/GOIoTPex#",
+     "geosparql" : "http://www.opengis.net/ont/geosparql#",
+     "iiot" : "http://inter-iot.eu/GOIoTP#",
+     "InterIoT" : "http://inter-iot.eu/",
+     "ssn" : "http://www.w3.org/ns/ssn/",
+     "sosa" : "http://www.w3.org/ns/sosa/"
    }
-}
+ }
