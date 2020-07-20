@@ -22,7 +22,10 @@ import eu.interiot.message.ID.PropertyID;
 import eu.interiot.message.payload.types.IoTDevicePayload;
 import eu.interiot.translators.syntax.sofia2.Sofia2Translator;
 
-
+/**
+ * For more information, contact:
+ * - @author <a href="mailto:majuse@upv.es">Matilde Julián</a>  
+ */
 
 public class Sofia2Utils {
 	
@@ -35,7 +38,7 @@ public class Sofia2Utils {
     // Types
  //   public static final String EntityTypeDevice = Sofia2Translator.sofia2baseURI + "Instance";
     public static final String EntityTypeDevice = URIoldssn + "Device";
-    public static final String EntityTypePlatform = URIsosa + "Platform"; // From class INTERMWDemoUtils
+    public static final String EntityTypePlatform = URIsosa + "Platform";
     
 	
 	static List<IoTDevice> extractDevices(Message message) {

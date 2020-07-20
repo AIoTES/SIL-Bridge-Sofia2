@@ -1,23 +1,9 @@
-/**
- * ACTIVAGE. ACTivating InnoVative IoT smart living environments for AGEing well.
- * ACTIVAGE is a R&D project which has received funding from the European 
- * Union’s Horizon 2020 research and innovation programme under grant 
- * agreement No 732679.
- * 
- * Copyright (C) 2016-2018, by :
- * - Universitat Politècnica de València, http://www.upv.es/
- * 
- *
- * For more information, contact:
- * - @author <a href="mailto:majuse@upv.es">Matilde Julián</a>  
- * - Project coordinator:  <a href="mailto:coordinator@activage.eu"></a>
- *  
- *
- *    This code is licensed under the EPL license, available at the root
- *    application directory.
- */
 package eu.interiot.intermw.bridge.sofia2;
 
+/**
+ * For more information, contact:
+ * - @author <a href="mailto:majuse@upv.es">Matilde Julián</a>  
+ */
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonArray;
@@ -127,7 +113,6 @@ public class Sofia2Bridge extends AbstractBridge {
 	public Message updatePlatform(Message message) throws Exception {
 		// TODO: update base endpoint, user, password
 		// TODO: send join request if connection data has been uploaded
-		// Do anything else?
 		Message responseMessage = createResponseMessage(message);
 		logger.info("Updating platform {}...", platform.getPlatformId());
 		return  responseMessage;
@@ -147,7 +132,6 @@ public class Sofia2Bridge extends AbstractBridge {
 		if (deviceIds.isEmpty()) {	
           throw new PayloadException("No entities of type Device found in the Payload.");
 		}
-		// TODO: FIND A BETTER WAY TO DO THIS
 		try{
 			logger.debug("Subscribing to things using conversationId {}...", conversationId);
 			for (String deviceId : deviceIds) {
@@ -174,7 +158,6 @@ public class Sofia2Bridge extends AbstractBridge {
 	            PlatformMessageMetadata metadata = new MessageMetadata().asPlatformMessageMetadata();
 	            metadata.initializeMetadata();
 	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.OBSERVATION);
-//	            metadata.addMessageType(URIManagerMessageMetadata.MessageTypesEnum.RESPONSE);
 	            metadata.setSenderPlatformId(new EntityID(platform.getPlatformId()));
 	            metadata.setConversationId(conversationId);        
 	            
@@ -219,7 +202,6 @@ public class Sofia2Bridge extends AbstractBridge {
 			responseMessage.getMetadata().asErrorMessageMetadata().setErrorDescription(e.toString());
 			responseMessage.getMetadata().asErrorMessageMetadata().setOriginalMessage(message.toString());
 		}
-		
 		return responseMessage;
 	}
 	
@@ -364,7 +346,6 @@ public class Sofia2Bridge extends AbstractBridge {
 		Message responseMessage = createResponseMessage(message);
 		try{
 			List<IoTDevice> devices = Sofia2Utils.extractDevices(message);
-			// TODO: FIND A BETTER WAY TO DO THIS
 			for (IoTDevice iotDevice : devices) {
 				String thingId[] = Sofia2Utils.filterThingID(iotDevice.getDeviceId());
 	            logger.debug("Sending create-device (start-to-manage) request to the platform for device {}...", iotDevice.getDeviceId());

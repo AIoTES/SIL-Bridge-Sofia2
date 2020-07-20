@@ -1,23 +1,9 @@
-/**
- * ACTIVAGE. ACTivating InnoVative IoT smart living environments for AGEing well.
- * ACTIVAGE is a R&D project which has received funding from the European 
- * Union’s Horizon 2020 research and innovation programme under grant 
- * agreement No 732679.
- * 
- * Copyright (C) 2016-2018, by :
- * - Universitat Politècnica de València, http://www.upv.es/
- * 
- *
- * For more information, contact:
- * - @author <a href="mailto:majuse@upv.es">Matilde Julián</a>  
- * - Project coordinator:  <a href="mailto:coordinator@activage.eu"></a>
- *  
- *
- *    This code is licensed under the EPL license, available at the root
- *    application directory.
- */
 package eu.interiot.intermw.bridge.sofia2;
 
+/**
+ * For more information, contact:
+ * - @author <a href="mailto:majuse@upv.es">Matilde Julián</a>  
+ */
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
