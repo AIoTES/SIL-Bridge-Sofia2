@@ -1,0 +1,86 @@
+ACTIVAGE Internet of Things (IoT) for ageing well www.activageproject.eu
+SOFIA2 bridge
+
+This project has received funding from the European Union's Horizon 2020 
+research and innovation programme under grant agreement No 732679.
+
+Copyright 2020 Universitat Politècnica de València
+
+
+I. Used Software
+
+This product uses the following software with corresponding licenses:
+
+        Jackson-annotations (com.fasterxml.jackson.core:jackson-annotations:2.9.0 - http://github.com/FasterXML/jackson) distributed under Apache License, Version 2.0
+        Jackson-core (com.fasterxml.jackson.core:jackson-core:2.9.0 - https://github.com/FasterXML/jackson-core) distributed under Apache License, Version 2.0
+        jackson-databind (com.fasterxml.jackson.core:jackson-databind:2.9.0 - http://github.com/FasterXML/jackson) distributed under Apache License, Version 2.0
+        dexx (com.github.andrewoma.dexx:collection:0.7 - https://github.com/andrewoma/dexx) distributed under MIT License
+        JSONLD Java :: Core (com.github.jsonld-java:jsonld-java:0.11.1 - http://github.com/jsonld-java/jsonld-java/jsonld-java/) distributed under BSD 3-clause
+        Gson (com.google.code.gson:gson:2.8.0 - https://github.com/google/gson/gson) distributed under Apache License, Version 2.0
+        Spark (com.sparkjava:spark-core:2.7.1 - http://www.sparkjava.com) distributed under Apache License, Version 2.0
+        Apache Commons CLI (commons-cli:commons-cli:1.4 - http://commons.apache.org/proper/commons-cli/) distributed under Apache License, Version 2.0
+        Apache Commons Codec (commons-codec:commons-codec:1.9 - http://commons.apache.org/proper/commons-codec/) distributed under Apache License, Version 2.0
+        Apache Commons IO (commons-io:commons-io:2.5 - http://commons.apache.org/proper/commons-io/) distributed under Apache License, Version 2.0
+        Message (eu.inter-iot.message:Message:0.9-SNAPSHOT - no url defined) distributed under Apache License, Version 2.0
+        Syntactic-translator (eu.inter-iot.translators:syntactic-translators:1.0 - no url defined) distributed under Eclipse Public License - Version 1.0
+        Middleware Commons COMM API (eu.interiot.intermw:comm.commons.api:2.3.0 - no url defined) distributed under Eclipse Public License - Version 1.0
+        Interfaces and abstract classes for the INTER-IoT Bridges (eu.interiot.intermw:mw.bridges.api:2.3.0 - no url defined) distributed under Eclipse Public License - Version 1.0
+        Middleware broker API (eu.interiot.intermw:mw.comm.broker.api:2.3.0 - no url defined) distributed under Eclipse Public License - Version 1.0
+        Middleware Commons API (eu.interiot.intermw:mw.commons.api:2.3.0 - no url defined) distributed under Eclipse Public License - Version 1.0
+        Middleware Commons Implementation (eu.interiot.intermw:mw.commons.impl:2.3.0 - no url defined) distributed under Eclipse Public License - Version 1.0
+        swagger-annotations (io.swagger:swagger-annotations:1.5.19 - https://github.com/swagger-api/swagger-core/modules/swagger-annotations) distributed under Apache License, Version 2.0
+        Java Servlet API (javax.servlet:javax.servlet-api:3.1.0 - http://servlet-spec.java.net) distributed under CDDL + GPLv2 with classpath exception
+        JUnit (junit:junit:4.12 - http://junit.org) distributed under Eclipse Public License - Version 1.0
+        Apache Commons CSV (org.apache.commons:commons-csv:1.4 - http://commons.apache.org/proper/commons-csv/) distributed under Apache License, Version 2.0
+        Apache Commons Lang (org.apache.commons:commons-lang3:3.5 - http://commons.apache.org/proper/commons-lang/) distributed under Apache License, Version 2.0
+        Apache HttpClient (org.apache.httpcomponents:httpclient:4.5.3 - http://hc.apache.org/httpcomponents-client) distributed under Apache License, Version 2.0
+        Apache HttpClient Cache (org.apache.httpcomponents:httpclient-cache:4.5.3 - http://hc.apache.org/httpcomponents-client) distributed under Apache License, Version 2.0
+        Apache HttpCore (org.apache.httpcomponents:httpcore:4.4.6 - http://hc.apache.org/httpcomponents-core-ga) distributed under Apache License, Version 2.0
+        Apache Jena - Libraries POM (org.apache.jena:apache-jena-libs:3.5.0 - http://jena.apache.org/apache-jena-libs/) distributed under Apache License, Version 2.0
+        Apache Jena - ARQ (SPARQL 1.1 Query Engine) (org.apache.jena:jena-arq:3.5.0 - http://jena.apache.org/jena-arq/) distributed under Apache License, Version 2.0
+        Apache Jena - Base Common Environment (org.apache.jena:jena-base:3.5.0 - http://jena.apache.org/jena-base/) distributed under Apache License, Version 2.0
+        Apache Jena - Core (org.apache.jena:jena-core:3.5.0 - http://jena.apache.org/jena-core/) distributed under Apache License, Version 2.0
+        Apache Jena - DBOE Base (org.apache.jena:jena-dboe-base:3.5.0 - http://jena.apache.org/jena-dboe-base/) distributed under Apache License, Version 2.0
+        Apache Jena - DBOE Indexes (org.apache.jena:jena-dboe-index:3.5.0 - http://jena.apache.org/jena-dboe-index/) distributed under Apache License, Version 2.0
+        Apache Jena - DBOE Transactional Datastructures (org.apache.jena:jena-dboe-trans-data:3.5.0 - http://jena.apache.org/jena-dboe-trans-data/) distributed under Apache License, Version 2.0
+        Apache Jena - DBOE Transactions (org.apache.jena:jena-dboe-transaction:3.5.0 - http://jena.apache.org/jena-dboe-transaction/) distributed under Apache License, Version 2.0
+        Apache Jena - IRI (org.apache.jena:jena-iri:3.5.0 - http://jena.apache.org/jena-iri/) distributed under Apache License, Version 2.0
+        Apache Jena - RDF Connection (org.apache.jena:jena-rdfconnection:3.5.0 - http://jena.apache.org/jena-rdfconnection/) distributed under Apache License, Version 2.0
+        Apache Jena - Shadowed external libraries (org.apache.jena:jena-shaded-guava:3.5.0 - http://jena.apache.org/jena-shaded-guava/) distributed under Apache License, Version 2.0
+        Apache Jena - TDB (Native Triple Store) (org.apache.jena:jena-tdb:3.5.0 - http://jena.apache.org/jena-tdb/) distributed under Apache License, Version 2.0
+        Apache Jena - TDB2 (org.apache.jena:jena-tdb2:3.5.0 - http://jena.apache.org/jena-tdb2/) distributed under Apache License, Version 2.0
+        Apache Log4j API (org.apache.logging.log4j:log4j-api:2.7 - http://logging.apache.org/log4j/2.x/log4j-api/) distributed under Apache License, Version 2.0
+        Apache Thrift (org.apache.thrift:libthrift:0.9.3 - http://thrift.apache.org) distributed under Apache License, Version 2.0
+        Jetty :: Asynchronous HTTP Client (org.eclipse.jetty:jetty-client:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Http Utility (org.eclipse.jetty:jetty-http:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: IO Utility (org.eclipse.jetty:jetty-io:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Security (org.eclipse.jetty:jetty-security:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Server Core (org.eclipse.jetty:jetty-server:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Servlet Handling (org.eclipse.jetty:jetty-servlet:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Utilities (org.eclipse.jetty:jetty-util:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Webapp Application Support (org.eclipse.jetty:jetty-webapp:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: XML utilities (org.eclipse.jetty:jetty-xml:9.4.6.v20170531 - http://www.eclipse.org/jetty) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Websocket :: API (org.eclipse.jetty.websocket:websocket-api:9.4.6.v20170531 - http://www.eclipse.org/jetty/websocket-api) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Websocket :: Client (org.eclipse.jetty.websocket:websocket-client:9.4.6.v20170531 - http://www.eclipse.org/jetty/websocket-client) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Websocket :: Common (org.eclipse.jetty.websocket:websocket-common:9.4.6.v20170531 - http://www.eclipse.org/jetty/websocket-common) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Websocket :: Server (org.eclipse.jetty.websocket:websocket-server:9.4.6.v20170531 - http://www.eclipse.org/jetty/websocket-server) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Jetty :: Websocket :: Servlet Interface (org.eclipse.jetty.websocket:websocket-servlet:9.4.6.v20170531 - http://www.eclipse.org/jetty/websocket-servlet) distributed under Apache License, Version 2.0 or Eclipse Public License - Version 1.0
+        Hamcrest Core (org.hamcrest:hamcrest-core:1.3 - https://github.com/hamcrest/JavaHamcrest/hamcrest-core) distributed under BSD 3-clause
+        JCL 1.2 implemented over SLF4J (org.slf4j:jcl-over-slf4j:1.7.25 - http://www.slf4j.org) distributed under MIT License
+        SLF4J API Module (org.slf4j:slf4j-api:1.7.13 - http://www.slf4j.org) distributed under MIT License
+        Xerces2-j (xerces:xercesImpl:2.11.0 - https://xerces.apache.org/xerces2-j/) distributed under Apache License, Version 2.0
+        XML Commons External Components XML APIs (xml-apis:xml-apis:1.4.01 - http://xml.apache.org/commons/components/external/) distributed under Apache License, Version 2.0 or The SAX License or The W3C License
+
+
+II. License Summary
+
+- Apache License, Version 2.0
+- BSD 2-clause
+- BSD 3-clause
+- CDDL + GPLv2 with classpath exception
+- CDDL 1.0
+- CDDL 1.1
+- Eclipse Public License - Version 1.0
+- MIT License
+- The SAX License
+- The W3C License

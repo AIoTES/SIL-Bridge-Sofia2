@@ -1,20 +1,20 @@
-/**
- * ACTIVAGE. ACTivating InnoVative IoT smart living environments for AGEing well.
- * ACTIVAGE is a R&D project which has received funding from the European 
- * Union’s Horizon 2020 research and innovation programme under grant 
- * agreement No 732679.
- * 
- * Copyright (C) 2016-2018, by :
- * - Universitat Politècnica de València, http://www.upv.es/
- * 
+/*
+ * Copyright 2020 Universitat Politècnica de València
  *
- * For more information, contact:
- * - @author <a href="mailto:majuse@upv.es">Matilde Julián</a>  
- * - Project coordinator:  <a href="mailto:coordinator@activage.eu"></a>
- *  
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- *    This code is licensed under the EPL license, available at the root
- *    application directory.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package eu.interiot.intermw.bridge.sofia2;
 

@@ -1,3 +1,23 @@
+<!--
+
+    Copyright 2020 Universitat Politècnica de València
+
+    See the NOTICE file distributed with this work for additional information
+    regarding copyright ownership.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -46,34 +66,138 @@
         </dependency>
         <dependency>
             <groupId>eu.interiot.intermw</groupId>
-            <artifactId>mw.commons.impl</artifactId>
+            <artifactId>mw.comm.broker.api</artifactId>
             <version>${intermw.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
+        <dependency>
+			<groupId>eu.interiot.intermw</groupId>
+			<artifactId>mw.bridges.api</artifactId>
+			<version>${intermw.version}</version>
+		</dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j-version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j-version}</version>
-            <scope>test</scope>
-        </dependency>
+			<groupId>com.sparkjava</groupId>
+			<artifactId>spark-core</artifactId>
+			<version>2.7.1</version>
+			<scope>provided</scope>
+		</dependency>
         <dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>${gson-version}</version>
+			<scope>provided</scope>
 		</dependency>
     </dependencies>
+
+<build>
+    <plugins>
+	  <plugin>
+        <groupId>com.mycila</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                <header>misc/license-header.txt</header>
+                <includes>
+                    <include>**/*.java</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+                <excludes>
+                    <exclude>misc/*</exclude>
+                </excludes>
+                <mapping>
+                    <java>SLASHSTAR_STYLE</java>
+                </mapping>
+            </configuration>
+        </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+        <profile>
+            <id>licenses</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>1.16</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>download-licenses</id>
+                                <goals>
+                                    <goal>download-licenses</goal>
+                                </goals>
+                                <configuration>
+                                    <!-- <excludedGroups>eu.interiot.intermw</excludedGroups> -->
+                                    <licensesConfigFile>misc/dependencies-license-info.xml</licensesConfigFile>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>add-third-party</id>
+                                <goals>
+                                    <goal>add-third-party</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${session.executionRootDirectory}</outputDirectory>
+                                    <thirdPartyFilename>NOTICE</thirdPartyFilename>
+                                    <excludedGroups>org.reflections</excludedGroups>
+									<excludeTransitiveDependencies>true</excludeTransitiveDependencies>
+                                    <fileTemplate>misc/NOTICE-template.ftl</fileTemplate>
+                                    <missingFile>misc/third-party.properties</missingFile>
+                                    <useMissingFile>true</useMissingFile>
+                                    <useRepositoryMissingFiles>true</useRepositoryMissingFiles>
+                                    <licenseMergesFile>misc/license-merges.txt</licenseMergesFile>
+                                    <includedLicenses>
+                                        <includedLicense>Apache License, Version 2.0</includedLicense>
+                                        <includedLicense>CC0</includedLicense>
+                                        <includedLicense>CDDL + GPLv2 with classpath exception</includedLicense>
+                                        <includedLicense>CDDL+GPL License</includedLicense>
+                                        <includedLicense>CDDL 1.0</includedLicense>
+                                        <includedLicense>CDDL 1.1</includedLicense>
+                                        <includedLicense>Eclipse Public License - Version 1.0</includedLicense>
+                                        <includedLicense>MIT License</includedLicense>
+                                        <includedLicense>The JSON License</includedLicense>
+                                        <includedLicense>WTFPL</includedLicense>
+                                        <includedLicense>BSD 2-clause</includedLicense>
+                                        <includedLicense>BSD 3-clause</includedLicense>
+                                        <includedLicense>BSD Like 2-clause</includedLicense>
+                                        <includedLicense>BSD Like 3-clause</includedLicense>
+                                        <!-- Currently not used, but may be added
+                                        <includedLicense>MPL 1.1</includedLicense>
+                                        <includedLicense>Public Domain</includedLicense>
+                                        <includedLicense>The W3C License</includedLicense>
+                                        <includedLicense>The SAX License</includedLicense> -->
+                                        <!-- Not compatible with this project and cannot be used:
+                                            Unknown license; GPL v2; GPL2 w/ CPE; LGPL 2.1;BSD-4-Clause
+                                        -->
+                                        <!-- About BSD licenses.
+                                            The BSD-4-Clause is not compatible with this project
+                                            BSD 2-clause, BSD 3-clause are OK.
+                                         For each included module that states the use of a "BSD" or "BSD-like" license it
+                                        should be checked which version it uses. Then, if it uses a compatible
+                                        version, the exception should be added to the ????? file with one of the texts:
+                                        "BSD 3-clause", "BSD 2-clause", "BSD Like 3-clause", "BSD Like 2-clause".
+                                        -->
+                                    </includedLicenses>
+                                    <failOnBlacklist>true</failOnBlacklist>
+                                    <overrideFile>misc/override-third-party.properties</overrideFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 
     <repositories>
         <repository>
