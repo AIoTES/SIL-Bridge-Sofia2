@@ -49,6 +49,7 @@
             <groupId>eu.interiot.intermw</groupId>
             <artifactId>mw.comm.broker.api</artifactId>
             <version>${intermw.version}</version>
+            <scope>provided</scope>
         </dependency>
 		
 		<!-- Translator dependencies -->
@@ -62,19 +63,9 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>eu.interiot.intermw</groupId>
-            <artifactId>mw.comm.broker.api</artifactId>
-            <version>${intermw.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-			<groupId>eu.interiot.intermw</groupId>
-			<artifactId>mw.bridges.api</artifactId>
-			<version>${intermw.version}</version>
-		</dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -90,7 +81,7 @@
         <dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>${gson-version}</version>
+			<version>2.8.2</version>
 			<scope>provided</scope>
 		</dependency>
     </dependencies>
@@ -148,11 +139,13 @@
                                 <configuration>
                                     <outputDirectory>${session.executionRootDirectory}</outputDirectory>
                                     <thirdPartyFilename>NOTICE</thirdPartyFilename>
-                                    <excludedGroups>org.reflections</excludedGroups>
+									<excludedScopes>provided</excludedScopes>
 									<excludeTransitiveDependencies>true</excludeTransitiveDependencies>
                                     <fileTemplate>misc/NOTICE-template.ftl</fileTemplate>
                                     <missingFile>misc/third-party.properties</missingFile>
                                     <useMissingFile>true</useMissingFile>
+                                    <aggregateMissingLicensesFile>misc/third-party.properties
+                                    </aggregateMissingLicensesFile>
                                     <useRepositoryMissingFiles>true</useRepositoryMissingFiles>
                                     <licenseMergesFile>misc/license-merges.txt</licenseMergesFile>
                                     <includedLicenses>

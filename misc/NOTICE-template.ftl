@@ -42,11 +42,7 @@ The project has no dependencies.
 II. License Summary
 
 - Apache License, Version 2.0
-- BSD 2-clause
 - BSD 3-clause
-- CDDL + GPLv2 with classpath exception
-- CDDL 1.0
-- CDDL 1.1
 - Eclipse Public License - Version 1.0
 - MIT License
 - The SAX License
