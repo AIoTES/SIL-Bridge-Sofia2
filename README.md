@@ -47,13 +47,13 @@ device-identifier-type=int
 
 **What to change?**
 
-* User and password or token for authentication (use only one type of authentication)
-* KP: name of the KP to connect the bridge with the platform. The KP must be defined in the platform before using the bridge.
-* KP-instance: name of the KP instance to include in the messages sent to the platform.
-* subscription-refresh: validity of the created subscriptions (in ms). 0 indicates that subscriptions are valid until they are deleted.
-* session-refresh: time interval (in ms) to renew the session with the platform using a JOIN request.
-* device-class: name of the ontology representing a device.
-* device-identifier and device-identifier-type: name and type of the property that represents the device identifier. (Default: the object id in SOFIA2).
+* **User** and **password** or **token** for authentication (use only one type of authentication)
+* **KP**: name of the KP to connect the bridge with the platform. The KP must be defined in the platform before using the bridge.
+* **KP-instance**: name of the KP instance to include in the messages sent to the platform.
+* **subscription-refresh**: validity of the created subscriptions (in ms). 0 indicates that subscriptions are valid until they are deleted.
+* **session-refresh**: time interval (in ms) to renew the session with the platform using a JOIN request.
+* **device-class**: name of the ontology representing a device.
+* **device-identifier** and **device-identifier-type**: name and type of the property that represents the device identifier. (Default: the object id in SOFIA2).
 * If you use self-signed certificates in your SOFIA2 platform, uncomment and add the security certificate and password.
 
 
@@ -105,7 +105,7 @@ JUnit tests are provided with the bridge code. These tests can be adapted to tes
 Platforms are registered in the SIL using the POST /mw2mw/platforms operation. In the case of SOFIA2, the parameters to be provided are:
 
 * **platformId**: the id that will be assigned to the registered platform (must be an URI)
-* **type: this is the bridge type to use (Check that the expected platform type is shown using GET platform-types in the API to confirm that the SOFIA2 bridge has been installed correctly). Generic SOFIA2 platform: http://inter-iot.eu/sofia2
+* **type**: this is the bridge type to use (Check that the expected platform type is shown using GET platform-types in the API to confirm that the SOFIA2 bridge has been installed correctly). Generic SOFIA2 platform: http://inter-iot.eu/sofia2
 * **baseEndpoint**: it refers to the machine (and TCP port) where SOFIA2 is available. It is an URL (e.g., "http://sofia2.com/" )
 * **location**: internal attribute used by SIL to give the geographic location of the platform. This field is optional, but in case it is provided, it has to be an URI.
 * **Name**: a label to identify the platform
